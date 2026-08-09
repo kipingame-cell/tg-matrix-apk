@@ -9,6 +9,8 @@ esbuild.build({
     format: 'iife',
     platform: 'browser',
     target: 'es2020',
+    // node-modules-polyfill отдаёт пустышку для crypto — подменяем на crypto-browserify
+    alias: { crypto: 'crypto-browserify' },
     plugins: [NodeModulesPolyfillPlugin(), NodeGlobalsPolyfillPlugin({ process: true, buffer: true })],
     define: { 'process.env.NODE_ENV': '"production"' },
     logLevel: 'info'
