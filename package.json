@@ -9,6 +9,7 @@
   "dependencies": {
     "@capacitor/core": "^6.1.2",
     "@capacitor/filesystem": "^6.0.1",
+    "crypto-browserify": "^3.12.0",
     "jszip": "^3.10.1",
     "telegram": "^2.26.22"
   },
