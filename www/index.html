@@ -9,7 +9,7 @@
             --at-red: #cc0000; --at-cream: #f4e8d3; --at-black: #0e0e10;
             --at-steel: #5a5a5f; --at-grey: #2a2a2e; --font: 'JetBrains Mono', monospace;
         }
-        body { background-color: var(--at-black); color: var(--at-cream); font-family: var(--font); margin: 0; padding: 10px; background-image: radial-gradient(var(--at-grey) 1px, transparent 1px); background-size: 25px 25px; }
+        body { background-color: var(--at-black); color: var(--at-cream); font-family: var(--font); margin: 0; padding: 10px 10px 80px 10px; background-image: radial-gradient(var(--at-grey) 1px, transparent 1px); background-size: 25px 25px; }
         .container { max-width: 600px; margin: 0 auto; }
         .frame { border: 3px solid var(--at-steel); background: rgba(20, 20, 23, 0.95); padding: 20px; margin-bottom: 25px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.9); }
         .section-title { position: absolute; top: -14px; left: 15px; background: var(--at-red); color: #fff; padding: 2px 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
@@ -40,6 +40,21 @@
         .hidden { display: none !important; }
         .small-muted { font-size: 9px; color: var(--at-steel); display: block; margin-bottom: 5px; }
         #btn_rescan { width: auto; padding: 10px 14px; margin-top: 0; font-size: 11px; background: #222; color: var(--at-cream); border: 1px solid var(--at-steel); border-bottom-width: 3px; }
+
+        /* Нижняя панель вкладок */
+        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; display: flex; background: #0a0a0c; border-top: 3px solid var(--at-steel); z-index: 200; }
+        .tab-btn { flex: 1; padding: 16px 4px; margin: 0; background: #0a0a0c; color: var(--at-steel); border: none; border-bottom: none; font-size: 12px; letter-spacing: 2px; }
+        .tab-btn.tab-active { background: var(--at-red); color: #fff; }
+
+        /* Журнал выгрузов */
+        .export-card { background: #0d0d10; border: 1px solid #333; border-left: 4px solid var(--at-red); padding: 12px; margin-bottom: 12px; }
+        .export-card .ec-name { color: #00ffff; font-size: 11px; word-break: break-all; font-weight: bold; }
+        .export-card .ec-meta { color: #888; font-size: 10px; margin-top: 6px; line-height: 1.7; }
+        .export-card .ec-badges { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+        .ec-badge { font-size: 9px; padding: 2px 8px; border: 1px solid #2d5a27; color: #A6E22E; }
+        .ec-badge.off { border-color: #333; color: #555; }
+        .export-card .ec-path { font-size: 9px; color: #555; margin-top: 8px; word-break: break-all; }
+        #btn_clear_registry { background: #330000; color: #ff4444; border-bottom-color: #800000; font-size: 10px; padding: 8px; }
     </style>
 </head>
 <body>
@@ -133,6 +148,23 @@
         </div>
     </div>
 </div>
+
+<div class="frame hidden" id="exports_frame" style="max-width:600px; margin:0 auto;">
+    <span class="section-title">ЖУРНАЛ ВЫГРУЗОВ</span>
+    <div style="font-size:9px; color:#5a5a5f; margin-bottom:12px; line-height:1.6;">
+        Архивы лежат навсегда в папке телефона:<br>
+        <b style="color:#888;">Документы → tgkit_exports</b><br>
+        Журнал хранит дату и метаданные каждого перехвата.
+    </div>
+    <div id="exports_list"></div>
+    <button id="btn_clear_registry">ОЧИСТИТЬ ЖУРНАЛ (ФАЙЛЫ ОСТАНУТСЯ)</button>
+</div>
+
+<div class="tab-bar">
+    <button class="tab-btn tab-active" id="tab_terminal">ТЕРМИНАЛ</button>
+    <button class="tab-btn" id="tab_exports">ВЫГРУЗЫ (<span id="tab_exports_count">0</span>)</button>
+</div>
+
 <script src="js/bundle.js"></script>
 </body>
 </html>
