@@ -1,5 +1,4 @@
 const esbuild = require('esbuild');
-const { NodeModulesPolyfillPlugin } = require('@esbuild-plugins/node-modules-polyfill');
 const { NodeGlobalsPolyfillPlugin } = require('@esbuild-plugins/node-globals-polyfill');
 
 esbuild.build({
@@ -9,9 +8,16 @@ esbuild.build({
     format: 'iife',
     platform: 'browser',
     target: 'es2020',
-    // node-modules-polyfill отдаёт пустышку для crypto — подменяем на crypto-browserify
-    alias: { crypto: 'crypto-browserify' },
-    plugins: [NodeModulesPolyfillPlugin(), NodeGlobalsPolyfillPlugin({ process: true, buffer: true })],
+    // Node-билтины подменяем явно: crypto → crypto-browserify (randomBytes/createHash),
+    // net → пустышка (в браузере GramJS ходит через WebSocket, TCPFull не вызывается)
+    alias: {
+        crypto: 'crypto-browserify',
+        stream: 'stream-browserify',
+        path: 'path-browserify',
+        os: 'os-browserify',
+        net: './src/empty.js'
+    },
+    plugins: [NodeGlobalsPolyfillPlugin({ process: true, buffer: true })],
     define: { 'process.env.NODE_ENV': '"production"' },
     logLevel: 'info'
 }).catch(() => process.exit(1));
