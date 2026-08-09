@@ -329,7 +329,7 @@ async function runExport() {
     const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
     const zipName = `tgkit_${chatName}_${stamp}.zip`;
 
-    const txt = records.map(r => `[${r.date}] ${r.sender}: ${r.text}`).join('\n');
+    const txtDump = records.map(r => `[${r.date}] ${r.sender}: ${r.text}`).join('\n');
     const json = JSON.stringify(records, null, 1);
     const heatJson = JSON.stringify(records.map(r => ({ user: r.sender, ts: r.date })));
 
@@ -387,7 +387,7 @@ async function runExport() {
 
     // ZIP
     const zip = new JSZip();
-    zip.file('messages.txt', txt);
+    zip.file('messages.txt', txtDump);
     zip.file('messages.json', json);
     if (graphText) zip.file('graph.graphml', graphText);
     if (buildHeatmap) zip.file('heatmap.json', heatJson);
@@ -398,6 +398,14 @@ async function runExport() {
     localStorage.setItem('tgk_graphml', graphText || '');
     localStorage.setItem('tgk_heat', heatJson);
     localStorage.setItem('tgk_lastres', JSON.stringify({ zipName, hasGraph: !!graphText, hasHeat: buildHeatmap, count: records.length }));
+    saveRegistry({
+        zipName,
+        chat: ($('selected_chat_display')?.innerText || '').replace('ВЫБРАН: ', '').replace('ОБЪЕКТ: ', ''),
+        count: records.length,
+        date: new Date().toISOString(),
+        sizeKB: Math.round(base64.length * 3 / 4 / 1024),
+        hasGraph: !!graphText, hasHeat: buildHeatmap, hasDossier: !!dossierText
+    });
 
     log('АРХИВ СОБРАН: ' + zipName);
     finishExportUI();
@@ -479,6 +487,55 @@ async function pushZipToBot() {
     } catch (e) { log('БОТ СБОЙ: ' + fmtErr(e), '#cc0000'); }
 }
 
+// --- ЖУРНАЛ ВЫГРУЗОВ ---
+function getRegistry() { try { return JSON.parse(localStorage.getItem('tgk_registry') || '[]'); } catch (e) { return []; } }
+
+function saveRegistry(entry) {
+    const r = getRegistry();
+    r.unshift(entry);
+    if (r.length > 200) r.length = 200;
+    try { localStorage.setItem('tgk_registry', JSON.stringify(r)); } catch (e) {}
+    renderExports();
+}
+
+function fmtSize(kb) { return kb >= 1024 ? (kb / 1024).toFixed(1) + ' МБ' : kb + ' КБ'; }
+
+function renderExports() {
+    const list = $('exports_list'); if (!list) return;
+    const r = getRegistry();
+    const cnt = $('tab_exports_count'); if (cnt) cnt.innerText = r.length;
+    if (!r.length) {
+        list.innerHTML = '<div style="color:#5a5a5f;font-size:11px;text-align:center;padding:30px;">ЖУРНАЛ ПУСТ.<br>ПЕРВЫЙ ПЕРЕХВАТ ЗАПИШЕТСЯ СЮДА.</div>';
+        return;
+    }
+    list.innerHTML = '';
+    r.forEach(e => {
+        const d = new Date(e.date);
+        const card = document.createElement('div');
+        card.className = 'export-card';
+        const badge = (on, t) => `<span class="ec-badge${on ? '' : ' off'}">${t}</span>`;
+        card.innerHTML =
+            `<div class="ec-name">${e.zipName}</div>` +
+            `<div class="ec-meta">` +
+            `ДАТА: ${d.toLocaleDateString('ru-RU')} ${d.toLocaleTimeString('ru-RU')}<br>` +
+            `ОБЪЕКТ: ${e.chat || '—'}<br>` +
+            `ПЕРЕХВАТ: ${e.count} сообщ. · РАЗМЕР: ${fmtSize(e.sizeKB || 0)}` +
+            `</div>` +
+            `<div class="ec-badges">${badge(e.hasGraph, 'ГРАФ')}${badge(e.hasHeat, 'РАДАР')}${badge(e.hasDossier, 'ДОСЬЕ')}</div>` +
+            `<div class="ec-path">→ Документы/tgkit_exports/${e.zipName}</div>`;
+        list.appendChild(card);
+    });
+}
+
+function switchTab(name) {
+    const term = name === 'terminal';
+    document.querySelector('.container').style.display = term ? '' : 'none';
+    $('exports_frame').classList.toggle('hidden', term);
+    $('tab_terminal').classList.toggle('tab-active', term);
+    $('tab_exports').classList.toggle('tab-active', !term);
+    if (!term) renderExports();
+}
+
 // --- ПАНЕЛЬ УПРАВЛЕНИЯ ---
 async function initControl() {
     $('auth_frame').classList.add('hidden');
@@ -526,6 +583,16 @@ window.addEventListener('DOMContentLoaded', async () => {
         location.reload();
     };
     $('btn_toggle_settings').onclick = () => $('settings_panel').classList.toggle('hidden');
+
+    // Вкладки снизу
+    $('tab_terminal').onclick = () => switchTab('terminal');
+    $('tab_exports').onclick = () => switchTab('exports');
+    $('btn_clear_registry').onclick = () => {
+        if (!confirm('Очистить журнал? Файлы в tgkit_exports останутся.')) return;
+        localStorage.removeItem('tgk_registry');
+        renderExports();
+    };
+    renderExports();
 
     // Автовход по сохранённой сессии
     if (localStorage.getItem('tgk_session')) {
