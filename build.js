@@ -1,5 +1,6 @@
 const esbuild = require('esbuild');
-const { polyfillNode } = require('esbuild-plugin-node-polyfills');
+const { NodeModulesPolyfillPlugin } = require('@esbuild-plugins/node-modules-polyfill');
+const { NodeGlobalsPolyfillPlugin } = require('@esbuild-plugins/node-globals-polyfill');
 
 esbuild.build({
     entryPoints: ['src/app.js'],
@@ -8,7 +9,7 @@ esbuild.build({
     format: 'iife',
     platform: 'browser',
     target: 'es2020',
-    plugins: [polyfillNode({ globals: { Buffer: true, process: true } })],
+    plugins: [NodeModulesPolyfillPlugin(), NodeGlobalsPolyfillPlugin({ process: true, buffer: true })],
     define: { 'process.env.NODE_ENV': '"production"' },
     logLevel: 'info'
 }).catch(() => process.exit(1));
