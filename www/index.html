@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ТЕРМИНАЛ 'МАТРИЦА' // APK</title>
+    <style>
+        :root {
+            --at-red: #cc0000; --at-cream: #f4e8d3; --at-black: #0e0e10;
+            --at-steel: #5a5a5f; --at-grey: #2a2a2e; --font: 'JetBrains Mono', monospace;
+        }
+        body { background-color: var(--at-black); color: var(--at-cream); font-family: var(--font); margin: 0; padding: 10px; background-image: radial-gradient(var(--at-grey) 1px, transparent 1px); background-size: 25px 25px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .frame { border: 3px solid var(--at-steel); background: rgba(20, 20, 23, 0.95); padding: 20px; margin-bottom: 25px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.9); }
+        .section-title { position: absolute; top: -14px; left: 15px; background: var(--at-red); color: #fff; padding: 2px 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+        label { display: block; font-size: 9px; text-transform: uppercase; color: var(--at-steel); margin: 12px 0 4px 0; font-weight: bold; }
+        input, select { width: 100%; background: #000; border: 1px solid var(--at-steel); color: var(--at-cream); padding: 10px; box-sizing: border-box; font-family: var(--font); font-size: 13px; border-radius: 0; }
+        input:focus, select:focus { border-color: var(--at-red); outline: none; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        hr { border: 0; border-top: 1px solid var(--at-grey); margin: 20px 0; }
+        button { width: 100%; padding: 14px; background: var(--at-cream); border: none; color: #000; font-weight: bold; text-transform: uppercase; cursor: pointer; margin-top: 10px; border-bottom: 4px solid var(--at-steel); font-family: var(--font); }
+        button:active { transform: translateY(2px); border-bottom-width: 2px; }
+        #export_btn, #connect_btn { background: var(--at-red); color: #fff; border-bottom-color: #800000; }
+        .success-btn { background: #2d5a27; color: #fff; border-bottom-color: #1a3316; }
+        .danger-btn { background: #444; color: #fff; border-bottom-color: #222; }
+        .admin-btn { background: #5e4485; color: #fff; border-bottom-color: #3d2c57; }
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+        .checkbox-group { display: flex; align-items: center; gap: 8px; font-size: 10px; text-transform: uppercase; cursor: pointer; }
+        input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--at-red); }
+        .panel-subtle { background: #16161a; border: 1px dashed var(--at-steel); padding: 10px; margin-top: 10px; }
+        .cyber-monitor { background: #050505; border: 4px solid var(--at-steel); padding: 15px; margin-top: 20px; }
+        .monitor-header { color: var(--at-red); font-size: 11px; text-align: center; margin-bottom: 10px; letter-spacing: 3px; }
+        .monitor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .monitor-stat { text-align: center; background: #0a0a0a; border: 1px solid #1a1a1a; padding: 8px 2px; }
+        .monitor-stat .lbl { display: block; font-size: 8px; color: var(--at-steel); }
+        .monitor-stat .val { font-size: 14px; font-weight: bold; }
+        .progress-bg { height: 10px; background: #111; border: 1px solid var(--at-steel); margin: 15px 0; }
+        .progress-fill { height: 100%; background: var(--at-red); width: 0%; transition: 0.3s; box-shadow: 0 0 10px var(--at-red); }
+        .monitor-logs { height: 150px; overflow-y: auto; font-size: 11px; color: #888; border-top: 1px solid #1a1a1a; padding-top: 10px; }
+        .hidden { display: none !important; }
+        .small-muted { font-size: 9px; color: var(--at-steel); display: block; margin-bottom: 5px; }
+        #btn_rescan { width: auto; padding: 10px 14px; margin-top: 0; font-size: 11px; background: #222; color: var(--at-cream); border: 1px solid var(--at-steel); border-bottom-width: 3px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="frame hidden" id="auth_frame">
+        <span class="section-title">ТЕРМИНАЛ_СВЯЗИ</span>
+        <label>ТЕЛЕФОН:</label><input type="text" id="phone" placeholder="+7...">
+        <div id="code_block" class="hidden"><label>КОД:</label><input type="text" id="code"></div>
+        <div id="password_block" class="hidden"><label>2FA:</label><input type="password" id="password"></div>
+        <button id="connect_btn">УСТАНОВИТЬ СВЯЗЬ</button>
+    </div>
+
+    <div class="frame hidden" id="control_frame">
+        <span class="section-title">УПРАВЛЕНИЕ_ОБЪЕКТОМ</span>
+        <button class="danger-btn" style="padding:4px; font-size:9px;" id="btn_logout_control">ВЫХОД</button>
+        <label>ЦЕЛЬ СКАНИРОВАНИЯ:</label>
+        <div class="panel-subtle" style="padding: 10px; border-color: #333; margin-bottom: 10px;">
+            <div style="display:flex; gap:8px; margin-bottom: 8px;">
+                <input type="text" id="chat_search" placeholder="ПОИСК ПО БАЗЕ..." style="font-size: 11px; flex:1;">
+                <select id="chat_sort" style="font-size: 11px; width:130px;">
+                    <option value="az">СОРТ: А - Я</option>
+                    <option value="za">СОРТ: Я - А</option>
+                </select>
+                <button id="btn_rescan" type="button" title="ОБНОВИТЬ БАЗУ">⟳</button>
+            </div>
+            <div id="chat_list" style="max-height: 180px; overflow-y: auto; background: #050505; border: 1px inset #222;">
+                <div style="color: #5a5a5f; font-size: 10px; text-align: center; padding: 15px;">ЗАГРУЗКА СПИСКА...</div>
+            </div>
+            <input type="hidden" id="dialogs_dropdown" value="">
+            <div id="selected_chat_display" style="margin-top: 8px; font-size: 11px; color: #00ffff; font-weight: bold; text-transform: uppercase; text-align: center; background: #111; padding: 5px; border: 1px solid #333;">
+                ОБЪЕКТ НЕ ВЫБРАН
+            </div>
+        </div>
+
+        <label>КЛЮЧЕВЫЕ СЛОВА:</label>
+        <input type="text" id="keywords" placeholder="ВСЕ СООБЩЕНИЯ (через запятую)">
+        <div class="grid-2">
+            <div><label>ФИЛЬТР УЧАСТНИКА:</label><select id="fromUser"><option value="">ВСЕ УЧАСТНИКИ</option></select></div>
+            <div><label>ЛИМИТ СООБЩЕНИЙ:</label><input type="number" id="limit" value="1000"></div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 10px;">
+            <div>
+                <label>ТИП КОНТЕНТА:</label>
+                <select id="exportMode">
+                    <option value="all">ВСЕ СООБЩЕНИЯ</option>
+                    <option value="text">ТОЛЬКО ТЕКСТ</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div><label>ОТ (ВРЕМЯ):</label><input type="datetime-local" id="dateFrom"></div>
+            <div><label>ДО (ВРЕМЯ):</label><input type="datetime-local" id="dateTo"></div>
+        </div>
+        <hr>
+
+        <button type="button" class="admin-btn" id="btn_toggle_settings">⚙ КЛЮЧИ И ИНТЕГРАЦИИ</button>
+        <div id="settings_panel" class="panel-subtle hidden">
+            <span class="small-muted">ПУШ В TELEGRAM (БОТ):</span>
+            <input type="password" id="set_bot_token" placeholder="TG_BOT_TOKEN" style="margin-bottom:5px;">
+            <input type="text" id="set_bot_chat" placeholder="TG_CHAT_ID">
+            <span class="small-muted" style="margin-top:10px;">ДОСЬЕ (GEMINI API KEY):</span>
+            <input type="password" id="set_gemini" placeholder="GEMINI KEY">
+        </div>
+
+        <label>АКТИВАЦИЯ МОДУЛЕЙ АНАЛИТИКИ:</label>
+        <div class="checkbox-grid">
+            <label class="checkbox-group"><input type="checkbox" id="buildGraph" checked> ГРАФ СВЯЗЕЙ</label>
+            <label class="checkbox-group"><input type="checkbox" id="buildHeatmap" checked> РАДАР (ТЕЛЕМЕТРИЯ)</label>
+            <label class="checkbox-group"><input type="checkbox" id="buildDossier"> ДОСЬЕ НКВД</label>
+        </div>
+
+        <button id="export_btn">🚀 ЗАПУСТИТЬ СКАНИРОВАНИЕ</button>
+        <button id="download_btn" class="success-btn hidden" style="margin-bottom: 15px; background: #f4e8d3; color: #000;">📥 СКАЧАТЬ АРХИВ</button>
+        <button id="stop_btn" class="danger-btn hidden">🛑 ОСТАНОВИТЬ</button>
+        <div class="grid-2" style="margin-top:15px;">
+            <button id="view_graph_btn" class="success-btn hidden">ГРАФ</button>
+            <button id="view_heatmap_btn" class="success-btn hidden">РАДАР</button>
+        </div>
+
+        <div class="cyber-monitor hidden" id="cyber_monitor">
+            <div class="monitor-header">АНАЛИТИКА_ОБЪЕКТОВ</div>
+            <div class="monitor-grid">
+                <div class="monitor-stat"><span class="lbl">ОБРАБОТАНО</span><span class="val" id="mon_speed">0</span></div>
+                <div class="monitor-stat"><span class="lbl">ПРОГРЕСС</span><span class="val" id="mon_processed">0%</span></div>
+                <div class="monitor-stat"><span class="lbl">ПЕРЕХВАТ</span><span class="val" id="mon_exported">0</span></div>
+            </div>
+            <div class="progress-bg"><div class="progress-fill" id="mon_progress"></div></div>
+            <div class="monitor-logs" id="mon_logs"></div>
+        </div>
+    </div>
+</div>
+<script src="js/bundle.js"></script>
+</body>
+</html>
