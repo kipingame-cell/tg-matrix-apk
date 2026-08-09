@@ -9,13 +9,15 @@ esbuild.build({
     platform: 'browser',
     target: 'es2020',
     // Node-билтины подменяем явно: crypto → crypto-browserify (randomBytes/createHash),
-    // net → пустышка (в браузере GramJS ходит через WebSocket, TCPFull не вызывается)
+    // net/fs/constants → пустышка (в браузере не вызываются: GramJS ходит через WebSocket)
     alias: {
         crypto: 'crypto-browserify',
         stream: 'stream-browserify',
         path: 'path-browserify',
         os: 'os-browserify',
-        net: './src/empty.js'
+        net: './src/empty.js',
+        fs: './src/empty.js',
+        constants: './src/empty.js'
     },
     plugins: [NodeGlobalsPolyfillPlugin({ process: true, buffer: true })],
     define: { 'process.env.NODE_ENV': '"production"' },
