@@ -197,11 +197,34 @@ async function selectChat(id, name) {
     const active = $('chat-item-' + id);
     if (active) { active.style.background = '#1a1a24'; active.style.borderLeft = '3px solid #cc0000'; }
 
+    // Топики форума
+    const ent = dialogMap.get(id);
+    const topicBlock = $('topic_block'), topicSel = $('topic_select');
+    if (topicBlock && topicSel) {
+        if (ent && ent.forum) {
+            topicBlock.classList.remove('hidden');
+            topicSel.innerHTML = '<option value="">ВСЕ ТОПИКИ</option><option value="-1" disabled>ЗАГРУЗКА ТОПИКОВ...</option>';
+            try {
+                const res = await client.invoke(new Api.channels.GetForumTopics({ channel: ent, offsetDate: 0, offsetId: 0, offsetTopic: 0, limit: 100 }));
+                topicSel.innerHTML = '<option value="">ВСЕ ТОПИКИ</option>';
+                (res.topics || []).forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t.id; opt.text = t.title;
+                    topicSel.appendChild(opt);
+                });
+            } catch (e) {
+                topicSel.innerHTML = '<option value="">ТОПИКИ НЕДОСТУПНЫ</option>';
+            }
+        } else {
+            topicBlock.classList.add('hidden');
+            topicSel.innerHTML = '<option value="">ВСЕ ТОПИКИ</option>';
+        }
+    }
+
     // Участники (для фильтра и резолва @username)
     const uDrop = $('fromUser');
     uDrop.innerHTML = '<option value="">СКАНИРОВАНИЕ...</option>';
     try {
-        const ent = dialogMap.get(id);
         const parts = await client.getParticipants(ent, { limit: 400 });
         window._usernameMap = new Map();
         uDrop.innerHTML = `<option value="">ВСЕ УЧАСТНИКИ (${parts.length})</option>`;
@@ -245,6 +268,8 @@ async function runExport() {
     ['download_btn', 'view_graph_btn', 'view_heatmap_btn'].forEach(i => $(i)?.classList.add('hidden'));
     $('mon_logs').innerHTML = '';
 
+    const topicId = ($('topic_select') && $('topic_select').value && parseInt($('topic_select').value) > 0) ? parseInt($('topic_select').value) : null;
+
     const limit = parseInt($('limit').value) || 1000;
     const keywords = $('keywords').value.trim().toLowerCase();
     const kwList = keywords ? keywords.split(',').map(s => s.trim()).filter(Boolean) : [];
@@ -265,7 +290,7 @@ async function runExport() {
     try {
         while (records.length < limit && !exportAbort) {
             const batch = Math.min(100, limit - records.length);
-            const msgs = await client.getMessages(ent, { limit: batch, offsetId });
+            const msgs = await client.getMessages(ent, topicId ? { limit: batch, offsetId, replyTo: topicId } : { limit: batch, offsetId });
             if (!msgs || !msgs.length) break;
 
             for (const m of msgs) {
@@ -325,7 +350,8 @@ async function runExport() {
     $('mon_processed').innerText = `${records.length} / ${limit}`;
 
     // --- ФАЙЛЫ ---
-    const chatName = ($('selected_chat_display').innerText.replace('ВЫБРАН: ', '') || 'chat').replace(/[^\wа-яёА-ЯЁ-]+/gi, '_').slice(0, 40);
+    const topicSuffix = (topicId && $('topic_select').selectedOptions[0]) ? '_' + $('topic_select').selectedOptions[0].text.replace(/[^\wа-яёА-ЯЁ-]+/gi, '_').slice(0, 25) : '';
+    const chatName = ($('selected_chat_display').innerText.replace('ВЫБРАН: ', '').split(' → ')[0] || 'chat').replace(/[^\wа-яёА-ЯЁ-]+/gi, '_').slice(0, 40) + topicSuffix;
     const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
     const zipName = `tgkit_${chatName}_${stamp}.zip`;
 
@@ -536,6 +562,18 @@ function switchTab(name) {
     if (!term) renderExports();
 }
 
+// --- ВЫБОР ТОПИКА ---
+function updateTopicDisplay() {
+    const topicSel = $('topic_select'); if (!topicSel) return;
+    const sel = JSON.parse(localStorage.getItem('tgk_sel') || 'null');
+    if (!sel) return;
+    const tid = topicSel.value && parseInt(topicSel.value) > 0 ? parseInt(topicSel.value) : null;
+    const tname = tid ? topicSel.selectedOptions[0].text : null;
+    sel.topicId = tid; sel.topicName = tname;
+    localStorage.setItem('tgk_sel', JSON.stringify(sel));
+    $('selected_chat_display').innerText = 'ВЫБРАН: ' + sel.name + (tname ? ' → ' + tname : '');
+}
+
 // --- ПАНЕЛЬ УПРАВЛЕНИЯ ---
 async function initControl() {
     $('auth_frame').classList.add('hidden');
@@ -559,7 +597,14 @@ async function initControl() {
     // Восстановить выбор после свежего скана (нужны entity)
     try {
         const sel = JSON.parse(localStorage.getItem('tgk_sel') || 'null');
-        if (sel && dialogMap.has(sel.id)) selectChat(sel.id, sel.name);
+        if (sel && dialogMap.has(sel.id)) {
+            await selectChat(sel.id, sel.name);
+            if (sel.topicId && $('topic_select')) {
+                $('topic_select').value = String(sel.topicId);
+                if ($('topic_select').value !== String(sel.topicId)) $('topic_select').value = '';
+                updateTopicDisplay();
+            }
+        }
     } catch (e) {}
 }
 
@@ -573,6 +618,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         return doSendCode();
     };
     $('btn_rescan').onclick = () => scanChats(false);
+    if ($('topic_select')) $('topic_select').onchange = updateTopicDisplay;
     $('chat_search').addEventListener('input', renderChats);
     $('chat_sort').addEventListener('change', renderChats);
     $('export_btn').onclick = runExport;
