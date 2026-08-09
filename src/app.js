@@ -61,6 +61,7 @@ function saveSession() {
     try { localStorage.setItem('tgk_session', client.session.save()); } catch (e) {}
 }
 const fmtErr = (e) => (e && (e.errorMessage || e.message)) || String(e);
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 // --- АВТОРИЗАЦИЯ ---
 async function doSendCode() {
@@ -278,6 +279,8 @@ async function runExport() {
     const dt = $('dateTo').value ? new Date($('dateTo').value).getTime() : null;
     const buildGraph = $('buildGraph').checked, buildHeatmap = $('buildHeatmap').checked;
     const buildDossier = $('buildDossier').checked;
+    const buildMedia = $('buildMedia') && $('buildMedia').checked;
+    const mediaFiles = [];   // {name, data: Buffer}
     const textOnly = $('exportMode').value === 'text';
 
     log('ЦЕЛЬ ЗАХВАЧЕНА. НАЧИНАЮ ПЕРЕХВАТ...');
@@ -285,59 +288,96 @@ async function runExport() {
     const senders = new Map();   // idStr -> name
     const records = [];          // {id, date, sender, senderId, text, replyTo, mentions, reactions}
     const msgSender = new Map(); // msgId -> senderId (для реплаев)
-    let offsetId = 0, processed = 0;
+    let processed = 0;
+
+    const updMon = () => {
+        $('mon_speed').innerText = processed;
+        $('mon_exported').innerText = records.length;
+        $('mon_progress').style.width = Math.min(100, Math.round(records.length / limit * 100)) + '%';
+        $('mon_processed').innerText = `${records.length} / ${limit}`;
+    };
 
     try {
-        while (records.length < limit && !exportAbort) {
-            const batch = Math.min(100, limit - records.length);
-            const msgs = await client.getMessages(ent, topicId ? { limit: batch, offsetId, replyTo: topicId } : { limit: batch, offsetId });
-            if (!msgs || !msgs.length) break;
+        const iterOpts = { limit };
+        if (topicId) iterOpts.replyTo = topicId;
+        for await (const m of client.iterMessages(ent, iterOpts)) {
+            if (exportAbort) break;
+            processed++;
 
-            for (const m of msgs) {
-                processed++;
-                offsetId = m.id;
-                if (m.action) continue; // системный мусор
-                const text = m.message || '';
-                if (textOnly && !text) continue;
-                const tsMs = m.date * 1000;
-                if (df && tsMs < df) continue;
-                if (dt && tsMs > dt) continue;
-                const sid = m.senderId ? m.senderId.toString() : (m.fromId ? m.fromId.toString() : null);
-                if (fromUser && sid !== fromUser) continue;
-                if (kwList.length && !kwList.some(k => text.toLowerCase().includes(k))) continue;
-
-                const senderName = sid ? await resolveSender(sid, senders) : 'СИСТЕМА';
-                const mentions = [];
-                (m.entities || []).forEach(en => {
-                    if (en.className === 'MessageEntityMention') {
-                        mentions.push(text.substr(en.offset, en.length).replace('@', '').toLowerCase());
-                    }
-                });
-                const reactions = [];
-                if (m.reactions && m.reactions.recentReactions) {
-                    m.reactions.recentReactions.forEach(r => {
-                        const pid = r.peerId ? r.peerId.toString() : null;
-                        if (pid) reactions.push(pid);
-                    });
-                }
-                const rec = {
-                    id: m.id, date: new Date(tsMs).toISOString(), sender: senderName, senderId: sid,
-                    text, replyTo: m.replyTo ? m.replyTo.replyToMsgId : null, mentions, reactions
-                };
-                records.push(rec);
-                if (sid) msgSender.set(m.id, sid);
-
-                if (records.length % 50 === 0) {
-                    $('mon_speed').innerText = processed;
-                    $('mon_exported').innerText = records.length;
-                    $('mon_progress').style.width = Math.min(100, Math.round(records.length / limit * 100)) + '%';
-                    $('mon_processed').innerText = `${records.length} / ${limit}`;
-                }
+            // Обход лимитов API: пауза-джиттер каждые 50 обработанных (как на сайте)
+            if (processed % 50 === 0) {
+                updMon();
+                const jitter = Math.floor(Math.random() * 2000) + 1000;
+                log(`[СИСТЕМА] Обход лимитов API. Пауза: ${jitter}ms...`);
+                await sleep(jitter);
+                if (exportAbort) break;
             }
-            if (msgs.length < batch) break;
+
+            if (m.action) continue; // системный мусор
+            const text = m.message || '';
+            if (textOnly && !text) continue;
+            const tsMs = m.date * 1000;
+            if (df && tsMs < df) break;      // лента идёт от новых к старым
+            if (dt && tsMs > dt) continue;
+            const sid = m.senderId ? m.senderId.toString() : (m.fromId ? m.fromId.toString() : null);
+            if (fromUser && sid !== fromUser) continue;
+            if (kwList.length && !kwList.some(k => text.toLowerCase().includes(k))) continue;
+
+            // Имя отправителя прямо из сообщения — без лишних запросов к API
+            let senderName = 'СИСТЕМА';
+            if (m.sender) {
+                senderName = [m.sender.firstName, m.sender.lastName].filter(Boolean).join(' ') || m.sender.title || m.sender.username || 'Unknown';
+                if (m.sender.username) window._usernameMap?.set(m.sender.username.toLowerCase(), sid);
+            } else if (sid) {
+                senderName = senders.get(sid) || ('ID' + sid);
+            }
+            if (sid && !senders.has(sid)) senders.set(sid, senderName);
+
+            const mentions = [];
+            (m.entities || []).forEach(en => {
+                if (en.className === 'MessageEntityMention') {
+                    mentions.push(text.substr(en.offset, en.length).replace('@', '').toLowerCase());
+                }
+            });
+            const reactions = [];
+            if (m.reactions && m.reactions.recentReactions) {
+                m.reactions.recentReactions.forEach(r => {
+                    const pid = r.peerId ? r.peerId.toString() : null;
+                    if (pid) reactions.push(pid);
+                });
+            }
+
+            // Превью медиа (как на сайте): миниатюры в zip/media/
+            let mediaFile = null;
+            if (buildMedia && m.media) {
+                try {
+                    await sleep(300 + Math.floor(Math.random() * 400));
+                    const buff = await client.downloadMedia(m, { thumb: 1 });
+                    if (buff) {
+                        mediaFile = `media/preview_${m.id}.jpg`;
+                        mediaFiles.push({ name: mediaFile, data: buff });
+                    }
+                } catch (e) { /* превью не критично */ }
+            }
+
+            const rec = {
+                id: m.id, date: new Date(tsMs).toISOString(), sender: senderName, senderId: sid,
+                text, replyTo: m.replyTo ? m.replyTo.replyToMsgId : null, mentions, reactions, media: mediaFile
+            };
+            records.push(rec);
+            if (sid) msgSender.set(m.id, sid);
         }
+        updMon();
     } catch (e) {
-        log('ОШИБКА ПЕРЕХВАТА: ' + fmtErr(e), '#cc0000');
+        const em = fmtErr(e);
+        if (/FLOOD_WAIT_(\d+)/.test(em)) {
+            const wait = Math.min(parseInt(em.match(/FLOOD_WAIT_(\d+)/)[1]), 120);
+            log(`[СИСТЕМА] Telegram просит паузу ${wait}с. Жду...`, '#fbc02d');
+            await sleep(wait * 1000);
+            log('[СИСТЕМА] Пауза выдержана. Запусти перехват заново — продолжим с того же места.', '#fbc02d');
+        } else {
+            log('ОШИБКА ПЕРЕХВАТА: ' + em, '#cc0000');
+        }
         finishExportUI();
         return;
     }
@@ -411,10 +451,22 @@ async function runExport() {
         } catch (e) { log('ДОСЬЕ СБОЙ: ' + fmtErr(e), '#cc0000'); }
     }
 
+    // HTML-дамп (как на сайте)
+    const escH = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const htmlBody = records.map(r =>
+        `<div class="msg"><div class="head"><span class="sender">${escH(r.sender)}</span><span>${r.date}</span></div>` +
+        `<div class="text">${escH(r.text)}</div>` +
+        (r.media ? `<br><img src="${r.media}" style="max-width:250px;border-radius:8px;margin-top:5px;border:1px solid #5a5a5f;">` : '') +
+        `</div>`).join('');
+    const htmlDump = `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><title>ПЕРЕХВАТ</title><style>body{background:#0a0a0a;color:#e0e0e0;font-family:monospace;padding:20px;}h1{color:#fbc02d;text-align:center;border-bottom:2px solid #b71c1c;text-transform:uppercase;letter-spacing:3px;font-size:1.3em;padding-bottom:10px;}.msg{border:1px solid #333;padding:12px;margin-bottom:12px;background:#151515;border-left:4px solid #b71c1c;}.head{display:flex;justify-content:space-between;font-size:12px;color:#777;margin-bottom:8px;border-bottom:1px dashed #333;padding-bottom:4px;}.sender{color:#fbc02d;font-weight:bold;text-transform:uppercase;}.text{font-size:14px;line-height:1.5;white-space:pre-wrap;color:#d0d0d0;}</style></head><body><h1>ПЕРЕХВАТ: ${escH(chatName)}</h1>${htmlBody}</body></html>`;
+
     // ZIP
     const zip = new JSZip();
     zip.file('messages.txt', txtDump);
+    zip.file('messages.html', htmlDump);
     zip.file('messages.json', json);
+    mediaFiles.forEach(f => zip.file(f.name, f.data));
+    if (mediaFiles.length) log(`МЕДИА: ${mediaFiles.length} превью в архиве`);
     if (graphText) zip.file('graph.graphml', graphText);
     if (buildHeatmap) zip.file('heatmap.json', heatJson);
     if (dossierText) zip.file('dossier.txt', dossierText);
@@ -430,7 +482,7 @@ async function runExport() {
         count: records.length,
         date: new Date().toISOString(),
         sizeKB: Math.round(base64.length * 3 / 4 / 1024),
-        hasGraph: !!graphText, hasHeat: buildHeatmap, hasDossier: !!dossierText
+        hasGraph: !!graphText, hasHeat: buildHeatmap, hasDossier: !!dossierText, hasMedia: mediaFiles.length > 0
     });
 
     log('АРХИВ СОБРАН: ' + zipName);
@@ -547,7 +599,7 @@ function renderExports() {
             `ОБЪЕКТ: ${e.chat || '—'}<br>` +
             `ПЕРЕХВАТ: ${e.count} сообщ. · РАЗМЕР: ${fmtSize(e.sizeKB || 0)}` +
             `</div>` +
-            `<div class="ec-badges">${badge(e.hasGraph, 'ГРАФ')}${badge(e.hasHeat, 'РАДАР')}${badge(e.hasDossier, 'ДОСЬЕ')}</div>` +
+            `<div class="ec-badges">${badge(e.hasGraph, 'ГРАФ')}${badge(e.hasHeat, 'РАДАР')}${badge(e.hasDossier, 'ДОСЬЕ')}${badge(e.hasMedia, 'МЕДИА')}</div>` +
             `<div class="ec-path">→ Документы/tgkit_exports/${e.zipName}</div>`;
         list.appendChild(card);
     });
