@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ТЕЛЕМЕТРИЯ // МАТРИЦА APK</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #050505; color: #f4e8d3; font-family: 'JetBrains Mono', monospace; margin: 0; padding: 20px; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #5a5a5f; padding-bottom: 15px; margin-bottom: 20px; }
+        h1 { margin: 0; color: #cc0000; font-size: 20px; text-transform: uppercase; letter-spacing: 3px; }
+        .controls-panel { background: #141417; border: 1px solid #333; padding: 15px; margin-bottom: 20px; display: flex; gap: 20px; flex-wrap: wrap; }
+        select, button, input[type=datetime-local] { background: #000; color: #fff; border: 1px solid #5a5a5f; padding: 8px 15px; font-family: inherit; font-size: 12px; cursor: pointer; }
+        input[type=datetime-local] { cursor: text; }
+        select:focus, button:hover { border-color: #cc0000; }
+        button.danger { background: #330000; color: #ff4444; border-color: #ff4444; }
+        button.active-mode { background: #cc0000; border-color: #cc0000; }
+        .users-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 15px; max-height: 150px; overflow-y: auto; padding: 10px; background: #000; border: 1px inset #333; }
+        .chart-wrapper { background: #0a0a0c; border: 2px solid #333; padding: 20px; height: 60vh; position: relative; }
+        .compare-panel { display: none; background: #0d0d10; border: 1px dashed #5a5a5f; padding: 15px; margin-top: 15px; width: 100%; }
+        .compare-panel.visible { display: block; }
+        .period-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 10px; font-size: 11px; }
+        .period-tag { padding: 4px 10px; font-weight: bold; }
+        .hint { color: #777; font-size: 10px; margin-top: 12px; line-height: 1.6; }
+        .stat-line { color: #A6E22E; font-size: 11px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <a href="../index.html" style="background: #cc0000; color: #fff; padding: 8px 12px; text-decoration: none; font-size: 12px; font-weight: bold;">[ НАЗАД ]</a>
+        <h1>ТЕЛЕМЕТРИЯ АКТИВНОСТИ</h1>
+    </div>
+
+    <div class="controls-panel">
+        <div>
+            <span style="display:block; margin-bottom:5px; color:#aaa; font-size:10px;">РЕЖИМ:</span>
+            <button id="btn_mode_normal" class="active-mode">ПО УЧАСТНИКАМ</button>
+            <button id="btn_mode_compare">СРАВНЕНИЕ ПЕРИОДОВ</button>
+        </div>
+        <div>
+            <span style="display:block; margin-bottom:5px; color:#aaa; font-size:10px;">МАСШТАБ ВРЕМЕНИ:</span>
+            <select id="time_res">
+                <option value="minute">ПО МИНУТАМ</option>
+                <option value="hour" selected>ПО ЧАСАМ</option>
+                <option value="day">ПО ДНЯМ</option>
+                <option value="week">ПО НЕДЕЛЯМ</option>
+                <option value="month">ПО МЕСЯЦАМ</option>
+                <option value="year">ПО ГОДАМ</option>
+            </select>
+        </div>
+        <div style="flex-grow: 1;">
+            <span style="display:block; margin-bottom:5px; color:#aaa; font-size:10px;">ФИЛЬТР ОБЪЕКТОВ:</span>
+            <button id="btn_all">ВЫБРАТЬ ВСЕХ</button>
+            <button id="btn_none" class="danger">ОЧИСТИТЬ</button>
+            <div class="users-grid" id="users_container"></div>
+        </div>
+        <div class="compare-panel" id="compare_panel">
+            <span style="display:block; color:#aaa; font-size:10px; margin-bottom:5px;">СРАВНЕНИЕ: ОБЩАЯ АКТИВНОСТЬ ЧАТА В ДВУХ ОТРЕЗКАХ ВРЕМЕНИ</span>
+            <div class="period-row">
+                <span class="period-tag" style="background:#330000;color:#ff5555;border:1px solid #ff5555;">ПЕРИОД A</span>
+                <input type="datetime-local" id="a_from"> <span style="color:#777;">—</span> <input type="datetime-local" id="a_to">
+            </div>
+            <div class="period-row">
+                <span class="period-tag" style="background:#002200;color:#A6E22E;border:1px solid #A6E22E;">ПЕРИОД B</span>
+                <input type="datetime-local" id="b_from"> <span style="color:#777;">—</span> <input type="datetime-local" id="b_to">
+            </div>
+            <div class="period-row">
+                <button id="btn_compare_go" style="border-color:#A6E22E;color:#A6E22E;">СРАВНИТЬ</button>
+            </div>
+            <div class="stat-line" id="compare_stat"></div>
+            <div class="hint">
+                Оба периода растягиваются на одну шкалу 0–100% своей длительности, поэтому можно сравнивать отрезки разной длины (неделя против месяца).<br>
+                Сплошная красная линия — период A, зелёная — период B. Учитываются сообщения выбранных участников (или весь чат, если включён «ВЕСЬ ЧАТ»).
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-wrapper">
+        <canvas id="mainChart"></canvas>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
