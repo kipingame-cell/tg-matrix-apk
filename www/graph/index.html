@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ГРАФ СВЯЗЕЙ // МАТРИЦА</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #050505; color: #f4e8d3; font-family: 'JetBrains Mono', monospace; overflow: hidden; }
+        #canvas { width: 100vw; height: 100vh; cursor: grab; }
+        #canvas:active { cursor: grabbing; }
+
+        .nav-btn { position: absolute; top: 14px; left: 14px; background: #cc0000; color: #fff; padding: 10px 14px; text-decoration: none; font-weight: bold; z-index: 100; border: 2px solid #5a5a5f; font-size: 12px; }
+
+        .panel { position: absolute; background: rgba(12,12,16,0.96); border: 2px solid #5a5a5f; border-top: 4px solid #cc0000; box-shadow: 0 0 24px rgba(204,0,0,0.25); z-index: 10; padding: 14px; }
+
+        #ui { top: 14px; right: 14px; width: 310px; max-height: calc(100vh - 28px); overflow-y: auto; }
+        #ui h3 { color: #cc0000; margin: 0 0 10px 0; font-size: 13px; letter-spacing: 2px; }
+        .stat-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; border-bottom: 1px dashed #333; padding-bottom: 3px; }
+        .stat-val { color: #00ffff; text-align: right; word-break: break-word; max-width: 60%; }
+
+        #search { width: 100%; background: #000; border: 1px solid #5a5a5f; color: #f4e8d3; padding: 8px; font-family: inherit; font-size: 12px; margin-bottom: 10px; }
+
+        .ctrl-row { display: flex; gap: 6px; margin-top: 8px; }
+        .ctrl-row button { flex: 1; background: #1a1a24; color: #f4e8d3; border: 1px solid #5a5a5f; padding: 7px 4px; font-family: inherit; font-size: 10px; cursor: pointer; text-transform: uppercase; }
+        .ctrl-row button:hover { border-color: #cc0000; color: #fff; }
+
+        .slider-block { margin-top: 10px; font-size: 10px; color: #aaa; }
+        .slider-block input[type=range] { width: 100%; accent-color: #cc0000; }
+        .slider-val { color: #00ffff; }
+
+        .etype-row { display: flex; gap: 10px; font-size: 10px; margin-top: 8px; flex-wrap: wrap; }
+        .etype-row label { display: flex; align-items: center; gap: 4px; cursor: pointer; text-transform: uppercase; }
+        .etype-row input { accent-color: #cc0000; }
+
+        #details { margin-top: 12px; border-top: 2px solid #cc0000; padding-top: 10px; display: none; }
+        #details h4 { color: #00ffff; margin: 0 0 8px 0; font-size: 13px; word-break: break-word; }
+        .top-contacts { font-size: 10px; color: #aaa; margin-top: 8px; line-height: 1.7; }
+        .top-contacts b { color: #f4e8d3; }
+
+        #legend { bottom: 14px; left: 14px; width: 250px; border-top-color: #5a5a5f; font-size: 10px; line-height: 1.8; color: #bbb; }
+        #legend h4 { margin: 0 0 8px 0; color: #f4e8d3; font-size: 11px; letter-spacing: 1px; }
+        .lg { display: flex; align-items: center; gap: 8px; }
+        .lg .dot { border-radius: 50%; display: inline-block; flex-shrink: 0; }
+        .lg .line { display: inline-block; flex-shrink: 0; height: 0; width: 22px; }
+
+        .node { cursor: pointer; stroke: #050505; stroke-width: 1.5px; }
+        .label { font-size: 11px; fill: #ddd; pointer-events: none; paint-order: stroke; stroke: #050505; stroke-width: 3px; }
+        .dim { opacity: 0.08; }
+        .node, .link, .label { transition: opacity 0.25s; }
+
+        #tooltip { position: absolute; pointer-events: none; background: rgba(10,10,14,0.95); border: 1px solid #cc0000; padding: 6px 10px; font-size: 11px; color: #f4e8d3; z-index: 50; display: none; max-width: 220px; }
+
+        @media (max-width: 700px) {
+            #ui { width: calc(100vw - 28px); max-height: 48vh; }
+            #legend { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="nav-btn">[ НАЗАД В ТЕРМИНАЛ ]</a>
+
+    <div class="panel" id="ui">
+        <h3>СЕТЕВОЙ АНАЛИЗ</h3>
+        <input id="search" placeholder="ПОИСК ОБЪЕКТА..." autocomplete="off">
+        <div class="stat-row"><span>УЧАСТНИКОВ:</span> <span id="st-n" class="stat-val">0</span></div>
+        <div class="stat-row"><span>СВЯЗЕЙ ВИДНО:</span> <span id="st-e" class="stat-val">0</span></div>
+        <div class="stat-row"><span>САМЫЙ АКТИВНЫЙ:</span> <span id="st-top" class="stat-val">-</span></div>
+        <div class="stat-row"><span>ГЛАВНЫЙ ХАБ:</span> <span id="st-hub" class="stat-val">-</span></div>
+
+        <div class="slider-block">
+            СИЛА СВЯЗИ (мин. <span class="slider-val" id="minw-val">1</span>):
+            <input type="range" id="minw" min="1" max="10" value="1" step="1">
+        </div>
+
+        <div class="etype-row">
+            <label><input type="checkbox" id="et-reply" checked> <span style="color:#8a8a90">ОТВЕТЫ</span></label>
+            <label><input type="checkbox" id="et-mention" checked> <span style="color:#FD971F">УПОМИНАНИЯ</span></label>
+            <label><input type="checkbox" id="et-reaction" checked> <span style="color:#f06595">РЕАКЦИИ</span></label>
+        </div>
+
+        <div class="ctrl-row">
+            <button id="btn-colormode">ЦВЕТ: ВЛИЯНИЕ</button>
+            <button id="btn-fit">ВПИСАТЬ</button>
+        </div>
+        <div class="ctrl-row">
+            <button id="btn-reheat">ПЕРЕМЕШАТЬ</button>
+            <button id="btn-labels">ИМЕНА: ВКЛ</button>
+        </div>
+
+        <div id="details">
+            <h4 id="det-title">-</h4>
+            <div class="stat-row"><span>СООБЩЕНИЙ:</span> <span id="det-msg" class="stat-val">0</span></div>
+            <div class="stat-row"><span>ИСХОДЯЩИХ СВЯЗЕЙ:</span> <span id="det-out" class="stat-val">0</span></div>
+            <div class="stat-row"><span>ВХОДЯЩИХ СВЯЗЕЙ:</span> <span id="det-in" class="stat-val">0</span></div>
+            <div class="stat-row"><span>ИНДЕКС ВЛИЯНИЯ:</span> <span id="det-inf" class="stat-val">0</span></div>
+            <div class="top-contacts" id="det-contacts"></div>
+        </div>
+    </div>
+
+    <div class="panel" id="legend">
+        <h4>КАК ЧИТАТЬ ГРАФ</h4>
+        <div class="lg"><span class="dot" style="width:18px;height:18px;background:#cc0000;"></span> Крупный узел — много сообщений</div>
+        <div class="lg"><span class="dot" style="width:9px;height:9px;background:#2d5a27;"></span> Мелкий узел — мало сообщений</div>
+        <div class="lg"><span class="line" style="border-top:3px solid #8a8a90;"></span> Ответы (реплаи)</div>
+        <div class="lg"><span class="line" style="border-top:3px dashed #FD971F;"></span> Упоминания @username</div>
+        <div class="lg"><span class="line" style="border-top:3px dotted #f06595;"></span> Реакции</div>
+        <div class="lg">Стрелка A → B = A действовал в сторону B</div>
+        <div class="lg">Толщина — частота. Ползунок отсекает слабые связи</div>
+        <div class="lg">Клик по узлу — досье и его окружение</div>
+        <div class="lg">Узлы можно таскать пальцем</div>
+    </div>
+
+    <div id="tooltip"></div>
+    <div id="canvas"></div>
+
+<script>
+// APK-версия: данные из ?file= или из localStorage ('tgk_graphml')
+const file = new URLSearchParams(window.location.search).get('file');
+const tooltip = document.getElementById('tooltip');
+let labelsVisible = true;
+let colorMode = 'influence'; // 'influence' | 'cluster'
+
+const TYPE_STYLE = {
+    reply:    { color: '#8a8a90', dash: null,    name: 'ОТВЕТЫ' },
+    mention:  { color: '#FD971F', dash: '6,4',   name: 'УПОМИНАНИЯ' },
+    reaction: { color: '#f06595', dash: '2,4',   name: 'РЕАКЦИИ' }
+};
+const CLUSTER_COLORS = ['#cc0000','#00ffff','#A6E22E','#FD971F','#AE81FF','#E6DB74','#f06595','#20c997','#66d9e8','#ffa8a8','#b2f2bb','#ffd43b'];
+
+async function run() {
+    let xml = null;
+    if (file) { const res = await fetch(file); xml = await res.text(); }
+    else { xml = localStorage.getItem('tgk_graphml'); }
+    if (!xml) return alert('НЕТ ДАННЫХ ГРАФА. СДЕЛАЙ ВЫГРУЗКУ В ТЕРМИНАЛЕ.');
+    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+
+    const nodes = [], nodeMap = new Map();
+    doc.querySelectorAll('node').forEach(n => {
+        const id = n.getAttribute('id');
+        let name = id, messages = 0;
+        n.querySelectorAll('data').forEach(d => {
+            if (d.getAttribute('key') === 'name') name = d.textContent;
+            if (d.getAttribute('key') === 'messages') messages = parseInt(d.textContent) || 0;
+        });
+        const o = { id, name, messages, out: 0, inn: 0, contacts: new Map() };
+        nodes.push(o); nodeMap.set(id, o);
+    });
+
+    const links = [];
+    doc.querySelectorAll('edge').forEach(e => {
+        const s = e.getAttribute('source'), t = e.getAttribute('target');
+        let weight = 1, type = 'reply';
+        e.querySelectorAll('data').forEach(d => {
+            if (d.getAttribute('key') === 'weight') weight = parseFloat(d.textContent) || 1;
+            if (d.getAttribute('key') === 'type') type = d.textContent;
+        });
+        if (nodeMap.has(s) && nodeMap.has(t) && s !== t) {
+            links.push({ source: s, target: t, weight, type, visible: true });
+            const S = nodeMap.get(s), T = nodeMap.get(t);
+            S.out += weight; T.inn += weight;
+            S.contacts.set(T.name, (S.contacts.get(T.name) || 0) + weight);
+            T.contacts.set(S.name, (T.contacts.get(S.name) || 0) + weight);
+        }
+    });
+
+    nodes.forEach(n => { if (!n.messages) n.messages = Math.max(1, n.out + n.inn); });
+
+    const maxMsg = Math.max(1, ...nodes.map(n => n.messages));
+    const maxInf = Math.max(1, ...nodes.map(n => n.out + n.inn));
+    const maxW = Math.max(1, ...links.map(l => l.weight));
+
+    document.getElementById('st-n').innerText = nodes.length;
+    const topActive = [...nodes].sort((a, b) => b.messages - a.messages)[0];
+    const topHub = [...nodes].sort((a, b) => (b.out + b.inn) - (a.out + a.inn))[0];
+    if (topActive) document.getElementById('st-top').innerText = `${topActive.name} (${topActive.messages})`;
+    if (topHub) document.getElementById('st-hub').innerText = `${topHub.name} (${topHub.out + topHub.inn})`;
+
+    const minwSlider = document.getElementById('minw');
+    minwSlider.max = maxW;
+
+    const W = window.innerWidth, H = window.innerHeight;
+    const svg = d3.select('#canvas').append('svg').attr('width', '100%').attr('height', '100%');
+    const g = svg.append('g');
+    const zoom = d3.zoom().scaleExtent([0.1, 6]).on('zoom', e => g.attr('transform', e.transform));
+    svg.call(zoom);
+
+    const rScale = d3.scaleSqrt().domain([1, maxMsg]).range([6, 34]);
+    const wScale = d3.scaleSqrt().domain([1, maxW]).range([1, 8]);
+    const infColor = d3.scaleLinear().domain([0, 0.5, 1]).range(['#2d5a27', '#f4a600', '#cc0000']).clamp(true);
+
+    // Разлетаем узлы по кругу сразу, чтобы не слипались в центре
+    nodes.forEach((n, i) => {
+        const angle = (i / nodes.length) * 2 * Math.PI;
+        const R = Math.min(W, H) * 0.35;
+        n.x = W / 2 + Math.cos(angle) * R;
+        n.y = H / 2 + Math.sin(angle) * R;
+    });
+
+    const defs = svg.append('defs');
+    Object.entries(TYPE_STYLE).forEach(([type, st]) => {
+        defs.append('marker')
+            .attr('id', 'arrow-' + type).attr('viewBox', '0 -5 10 10')
+            .attr('refX', 10).attr('refY', 0)
+            .attr('markerWidth', 5).attr('markerHeight', 5)
+            .attr('orient', 'auto')
+            .append('path').attr('d', 'M0,-4L8,0L0,4').attr('fill', st.color);
+    });
+
+    const sim = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(d => d.id)
+            .distance(d => 130 + rScale(d.source.messages) + rScale(d.target.messages))
+            .strength(0.35))
+        .force('charge', d3.forceManyBody().strength(d => -380 - rScale(d.messages) * 12))
+        .force('collide', d3.forceCollide(d => rScale(d.messages) + 20).strength(0.9))
+        .force('x', d3.forceX(W / 2).strength(0.045))
+        .force('y', d3.forceY(H / 2).strength(0.045));
+
+    const link = g.selectAll('.link').data(links).enter().append('line')
+        .attr('class', 'link')
+        .attr('stroke', d => TYPE_STYLE[d.type].color)
+        .attr('stroke-opacity', 0.55)
+        .attr('stroke-dasharray', d => TYPE_STYLE[d.type].dash)
+        .attr('stroke-width', d => wScale(d.weight))
+        .attr('marker-end', d => `url(#arrow-${d.type})`);
+
+    const node = g.selectAll('.node').data(nodes).enter().append('circle')
+        .attr('class', 'node')
+        .attr('r', d => rScale(d.messages))
+        .on('mouseover', (e, d) => {
+            tooltip.style.display = 'block';
+            tooltip.innerHTML = `<b>${d.name}</b><br>Сообщений: ${d.messages} · Влияние: ${d.out + d.inn}`;
+        })
+        .on('mousemove', (e) => { tooltip.style.left = (e.pageX + 14) + 'px'; tooltip.style.top = (e.pageY + 14) + 'px'; })
+        .on('mouseout', () => { tooltip.style.display = 'none'; })
+        .on('click', (e, d) => selectNode(d))
+        .call(d3.drag()
+            .on('start', (e, d) => { if (!e.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+            .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
+            .on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
+
+    const labels = g.selectAll('.label').data(nodes).enter().append('text')
+        .attr('class', 'label')
+        .attr('dy', d => rScale(d.messages) + 14)
+        .attr('text-anchor', 'middle')
+        .text(d => d.name);
+
+    sim.on('tick', () => {
+        link.each(function(d) {
+            const dx = d.target.x - d.source.x, dy = d.target.y - d.source.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            const tr = rScale(d.target.messages) + 6;
+            d.x2 = d.target.x - dx / dist * tr;
+            d.y2 = d.target.y - dy / dist * tr;
+        });
+        link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+            .attr('x2', d => d.x2).attr('y2', d => d.y2);
+        node.attr('cx', d => d.x).attr('cy', d => d.y);
+        labels.attr('x', d => d.x).attr('y', d => d.y);
+    });
+
+    // --- КЛАСТЕРЫ (label propagation по видимым связям) ---
+    function detectClusters() {
+        const visLinks = links.filter(l => l.visible);
+        const adj = new Map(nodes.map(n => [n.id, []]));
+        visLinks.forEach(l => {
+            const s = l.source.id ?? l.source, t = l.target.id ?? l.target;
+            if (adj.has(s)) adj.get(s).push({ to: t, w: l.weight });
+            if (adj.has(t)) adj.get(t).push({ to: s, w: l.weight });
+        });
+        const label = new Map(nodes.map(n => [n.id, n.id]));
+        for (let iter = 0; iter < 25; iter++) {
+            let changed = false;
+            const order = [...nodes].sort(() => Math.random() - 0.5);
+            for (const n of order) {
+                const counts = new Map();
+                for (const { to, w } of adj.get(n.id)) {
+                    const L = label.get(to);
+                    counts.set(L, (counts.get(L) || 0) + w);
+                }
+                if (!counts.size) continue;
+                const best = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+                if (best !== label.get(n.id)) { label.set(n.id, best); changed = true; }
+            }
+            if (!changed) break;
+        }
+        const remap = new Map(); let idx = 0;
+        const clusterOf = new Map();
+        nodes.forEach(n => {
+            const L = label.get(n.id);
+            if (!remap.has(L)) remap.set(L, idx++);
+            clusterOf.set(n.id, remap.get(L));
+        });
+        return clusterOf;
+    }
+
+    let clusterOf = null;
+    function applyColors() {
+        if (colorMode === 'cluster') {
+            clusterOf = detectClusters();
+            node.attr('fill', d => CLUSTER_COLORS[clusterOf.get(d.id) % CLUSTER_COLORS.length]);
+        } else {
+            node.attr('fill', d => infColor(maxInf === 1 ? 0.3 : (d.out + d.inn) / maxInf));
+        }
+    }
+    applyColors();
+
+    // --- ФИЛЬТРАЦИЯ СВЯЗЕЙ ---
+    function applyFilters() {
+        const minW = parseInt(minwSlider.value);
+        const typesOn = {
+            reply: document.getElementById('et-reply').checked,
+            mention: document.getElementById('et-mention').checked,
+            reaction: document.getElementById('et-reaction').checked
+        };
+        let visibleCount = 0;
+        links.forEach(l => { l.visible = l.weight >= minW && typesOn[l.type]; if (l.visible) visibleCount++; });
+        link.style('display', d => d.visible ? '' : 'none');
+        document.getElementById('st-e').innerText = `${visibleCount} / ${links.length}`;
+        const hasVis = new Set();
+        links.forEach(l => { if (l.visible) { hasVis.add(l.source.id ?? l.source); hasVis.add(l.target.id ?? l.target); } });
+        node.style('opacity', d => (minW > 1 && !hasVis.has(d.id)) ? 0.25 : 1);
+        labels.style('opacity', d => (minW > 1 && !hasVis.has(d.id)) ? 0.25 : 1);
+        if (colorMode === 'cluster') applyColors();
+    }
+    minwSlider.addEventListener('input', () => {
+        document.getElementById('minw-val').innerText = minwSlider.value;
+        applyFilters();
+    });
+    ['et-reply','et-mention','et-reaction'].forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
+    applyFilters();
+
+    function neighborsOf(d) {
+        const set = new Set([d.id]);
+        links.forEach(l => {
+            if (!l.visible) return;
+            const s = l.source.id ?? l.source, t = l.target.id ?? l.target;
+            if (s === d.id) set.add(t);
+            if (t === d.id) set.add(s);
+        });
+        return set;
+    }
+
+    function highlight(d) {
+        if (!d) { node.classed('dim', false); link.classed('dim', false); labels.classed('dim', false); return; }
+        const nb = neighborsOf(d);
+        node.classed('dim', n => !nb.has(n.id));
+        labels.classed('dim', n => !nb.has(n.id));
+        link.classed('dim', l => !((l.source.id ?? l.source) === d.id || (l.target.id ?? l.target) === d.id));
+    }
+
+    function selectNode(d) {
+        highlight(d);
+        document.getElementById('details').style.display = 'block';
+        document.getElementById('det-title').innerText = d.name;
+        document.getElementById('det-msg').innerText = d.messages;
+        document.getElementById('det-out').innerText = d.out;
+        document.getElementById('det-in').innerText = d.inn;
+        document.getElementById('det-inf').innerText = d.out + d.inn;
+        const top = [...d.contacts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+        document.getElementById('det-contacts').innerHTML = top.length
+            ? 'БЛИЖАЙШИЙ КРУГ:<br>' + top.map(([n, w]) => `<b>${n}</b> — ${w} связей`).join('<br>')
+            : 'СВЯЗЕЙ НЕТ (только монологи)';
+    }
+
+    svg.on('click', (e) => { if (e.target.tagName === 'svg') { highlight(null); document.getElementById('details').style.display = 'none'; } });
+
+    document.getElementById('search').addEventListener('input', (e) => {
+        const q = e.target.value.trim().toLowerCase();
+        if (!q) return highlight(null);
+        const found = nodes.find(n => n.name.toLowerCase().includes(q));
+        if (found) highlight(found);
+    });
+
+    document.getElementById('btn-colormode').onclick = (e) => {
+        colorMode = colorMode === 'influence' ? 'cluster' : 'influence';
+        e.target.innerText = 'ЦВЕТ: ' + (colorMode === 'influence' ? 'ВЛИЯНИЕ' : 'КЛАСТЕРЫ');
+        applyColors();
+    };
+    document.getElementById('btn-fit').onclick = () => {
+        const xs = nodes.map(n => n.x), ys = nodes.map(n => n.y);
+        const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+        const scale = Math.min(W / (maxX - minX + 120), H / (maxY - minY + 120), 2);
+        const tx = W / 2 - (minX + maxX) / 2 * scale, ty = H / 2 - (minY + maxY) / 2 * scale;
+        svg.transition().duration(600).call(zoom.transform, d3.zoomIdentity.translate(tx, ty).scale(scale));
+    };
+    document.getElementById('btn-reheat').onclick = () => { nodes.forEach(n => { n.fx = null; n.fy = null; }); sim.alpha(0.8).restart(); };
+    document.getElementById('btn-labels').onclick = (e) => {
+        labelsVisible = !labelsVisible;
+        labels.style('display', labelsVisible ? '' : 'none');
+        e.target.innerText = 'ИМЕНА: ' + (labelsVisible ? 'ВКЛ' : 'ВЫКЛ');
+    };
+}
+run();
+</script>
+</body>
+</html>
