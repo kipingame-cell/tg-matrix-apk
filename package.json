@@ -15,7 +15,8 @@
   "devDependencies": {
     "@capacitor/android": "^6.1.2",
     "@capacitor/cli": "^6.1.2",
-    "esbuild": "^0.25.0",
-    "esbuild-plugin-node-polyfills": "^1.0.2"
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
+    "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
+    "esbuild": "^0.25.0"
   }
 }
