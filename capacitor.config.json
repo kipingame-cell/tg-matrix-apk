@@ -1,0 +1,8 @@
+{
+  "appId": "com.kipingame.tgkit",
+  "appName": "TG Matrix Kit",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true
+  }
+}
