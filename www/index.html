@@ -120,7 +120,10 @@
 
         <button type="button" class="admin-btn" id="btn_toggle_settings">⚙ КЛЮЧИ И ИНТЕГРАЦИИ</button>
         <div id="settings_panel" class="panel-subtle hidden">
-            <span class="small-muted">ПУШ В TELEGRAM (БОТ):</span>
+            <span class="small-muted">СВОИ API-КЛЮЧИ (my.telegram.org) — ЕСЛИ КОД НЕ ПРИХОДИТ:</span>
+            <input type="text" id="set_api_id" placeholder="API_ID (пусто = встроенный)" style="margin-bottom:5px;">
+            <input type="password" id="set_api_hash" placeholder="API_HASH (пусто = встроенный)">
+            <span class="small-muted" style="margin-top:10px;">ПУШ В TELEGRAM (БОТ):</span>
             <input type="password" id="set_bot_token" placeholder="TG_BOT_TOKEN" style="margin-bottom:5px;">
             <input type="text" id="set_bot_chat" placeholder="TG_CHAT_ID">
             <span class="small-muted" style="margin-top:10px;">ДОСЬЕ (ОСНОВНОЙ — GEMINI API KEY):</span>

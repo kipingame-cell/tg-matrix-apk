@@ -26,11 +26,19 @@ const cfg = {
     get groq() { return localStorage.getItem('tgk_groq') || ''; }
 };
 function bindSettings() {
-    const map = { set_bot_token: 'tgk_bot_token', set_bot_chat: 'tgk_bot_chat', set_gemini: 'tgk_gemini', set_groq: 'tgk_groq' };
+    const map = { set_api_id: 'tgk_api_id', set_api_hash: 'tgk_api_hash', set_bot_token: 'tgk_bot_token', set_bot_chat: 'tgk_bot_chat', set_gemini: 'tgk_gemini', set_groq: 'tgk_groq' };
     Object.entries(map).forEach(([id, key]) => {
         const el = $(id); if (!el) return;
         el.value = localStorage.getItem(key) || '';
-        el.onchange = () => localStorage.setItem(key, el.value.trim());
+        el.onchange = () => {
+            localStorage.setItem(key, el.value.trim());
+            // смена API-ключей = другой клиент: старая сессия невалидна
+            if (key === 'tgk_api_id' || key === 'tgk_api_hash') {
+                localStorage.removeItem('tgk_session');
+                try { if (client) client.disconnect(); } catch (e) {}
+                client = null;
+            }
+        };
     });
 }
 
