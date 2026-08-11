@@ -22,10 +22,11 @@ const cfg = {
     get apiHash() { return localStorage.getItem('tgk_api_hash') || 'eb06d4abfb49dc3eeb1aeb98ae0f581e'; },
     get botToken() { return localStorage.getItem('tgk_bot_token') || ''; },
     get botChat() { return localStorage.getItem('tgk_bot_chat') || ''; },
-    get gemini() { return localStorage.getItem('tgk_gemini') || ''; }
+    get gemini() { return localStorage.getItem('tgk_gemini') || ''; },
+    get groq() { return localStorage.getItem('tgk_groq') || ''; }
 };
 function bindSettings() {
-    const map = { set_bot_token: 'tgk_bot_token', set_bot_chat: 'tgk_bot_chat', set_gemini: 'tgk_gemini' };
+    const map = { set_bot_token: 'tgk_bot_token', set_bot_chat: 'tgk_bot_chat', set_gemini: 'tgk_gemini', set_groq: 'tgk_groq' };
     Object.entries(map).forEach(([id, key]) => {
         const el = $(id); if (!el) return;
         el.value = localStorage.getItem(key) || '';
@@ -256,6 +257,89 @@ async function resolveSender(idStr, cache) {
     return name;
 }
 
+// --- ДОСЬЕ: автовыбор модели + резервный канал ---
+async function discoverGeminiModels(key) {
+    try {
+        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}&pageSize=200`);
+        const jr = await resp.json();
+        const rank = (n) => {
+            let s = 0;
+            if (n.includes('flash')) s += 100;
+            if (n.includes('lite')) s += 20;
+            if (n.includes('pro')) s += 50;
+            const ver = n.match(/(\d+(?:\.\d+)?)/);
+            if (ver) s += parseFloat(ver[1]) * 10;
+            if (/image|tts|embed|aqa|vision|audio|robotics|computer-use/i.test(n)) s -= 10000;
+            return s;
+        };
+        return (jr.models || [])
+            .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+            .map(m => m.name.replace('models/', ''))
+            .sort((a, b) => rank(b) - rank(a));
+    } catch (e) { return []; }
+}
+
+async function tryGeminiModel(key, model, prompt) {
+    try {
+        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        const jr = await resp.json();
+        const txt = jr.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || null;
+        if (txt && txt.length > 20) return txt;
+        return { error: jr.error ? `${jr.error.code}: ${(jr.error.message || '').slice(0, 120)}` : 'EMPTY' };
+    } catch (e) { return { error: fmtErr(e) }; }
+}
+
+async function genDossier(prompt) {
+    const key = cfg.gemini;
+    if (key) {
+        // 1) Узнаём у Google, какие модели живы, и идём по списку от лучшей
+        let models = await discoverGeminiModels(key);
+        if (!models.length) {
+            log('ДОСЬЕ: список моделей не получен, иду по запасному порядку...', '#fbc02d');
+            models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash-lite', 'gemini-1.5-flash'];
+        } else {
+            log(`ДОСЬЕ: доступно моделей: ${models.length}. Первая: ${models[0]}`);
+        }
+        for (const m of models.slice(0, 8)) {
+            const r = await tryGeminiModel(key, m, prompt);
+            if (typeof r === 'string') {
+                if (m !== models[0]) log('ДОСЬЕ: переключился на ' + m, '#fbc02d');
+                return r;
+            }
+            log(`ДОСЬЕ: ${m} отказал (${r.error}), пробую следующую...`, '#fbc02d');
+            await sleep(800);
+        }
+        log('ДОСЬЕ: Gemini недоступен/лимит. Ухожу на бесплатный резерв...', '#fbc02d');
+    }
+    // 2) Резерв: Groq — бесплатный тир (ключ: console.groq.com), модели перебираем
+    const gk = cfg.groq;
+    if (gk) {
+        for (const m of ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'gemma2-9b-it']) {
+            try {
+                const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + gk },
+                    body: JSON.stringify({ model: m, messages: [{ role: 'user', content: prompt.slice(0, 60000) }] })
+                });
+                const jr = await resp.json();
+                const txt = jr.choices?.[0]?.message?.content;
+                if (txt && txt.length > 20) {
+                    log('ДОСЬЕ: ответил резерв Groq (' + m + ')', '#fbc02d');
+                    return txt;
+                }
+                log(`ДОСЬЕ: Groq ${m} отказал (${(jr.error?.message || 'EMPTY').slice(0, 80)}), следующая...`, '#fbc02d');
+                await sleep(800);
+            } catch (e) { log('ДОСЬЕ: Groq сбой: ' + fmtErr(e), '#fbc02d'); }
+        }
+    } else {
+        log('ДОСЬЕ: резервный GROQ KEY не задан (бесплатно: console.groq.com)', '#fbc02d');
+    }
+    return 'ОШИБКА: все каналы нейросети недоступны. Проверь GEMINI KEY, добавь GROQ KEY (бесплатно: console.groq.com) или повтори позже.';
+}
+
 async function runExport() {
     const chatId = $('dialogs_dropdown').value;
     if (!chatId) return alert('ОБЪЕКТ НЕ ВЫБРАН');
@@ -434,21 +518,15 @@ async function runExport() {
         log(`ГРАФ: ${counts.size} узлов, ${links.size} связей`);
     }
 
-    // Досье (Gemini)
+    // Досье (нейросеть: автовыбор живой модели Gemini, резерв — Groq бесплатно)
     let dossierText = null;
-    if (buildDossier && cfg.gemini) {
+    if (buildDossier) {
         log('ДОСЬЕ: ЗАПРОС К НЕЙРОСЕТИ...');
-        try {
-            const sample = records.slice(0, 800).map(r => `${r.sender}: ${r.text}`).join('\n').slice(0, 60000);
-            const prompt = 'Ты — аналитик. По дампу переписки составь краткое досье на самых активных участников: стиль общения, темы, роль в чате, взаимодействия. Ответ на русском, структурировано.\n\nДАМП:\n' + sample;
-            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(cfg.gemini)}`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-            const jr = await resp.json();
-            dossierText = jr.candidates?.[0]?.content?.parts?.[0]?.text || ('ОШИБКА: ' + JSON.stringify(jr).slice(0, 300));
-            log('ДОСЬЕ ГОТОВО');
-        } catch (e) { log('ДОСЬЕ СБОЙ: ' + fmtErr(e), '#cc0000'); }
+        const sample = records.slice(0, 800).map(r => `${r.sender}: ${r.text}`).join('\n').slice(0, 60000);
+        const prompt = 'Ты — аналитик. По дампу переписки составь краткое досье на самых активных участников: стиль общения, темы, роль в чате, взаимодействия. Ответ на русском, структурировано.\n\nДАМП:\n' + sample;
+        dossierText = await genDossier(prompt);
+        if (dossierText && !dossierText.startsWith('ОШИБКА')) log('ДОСЬЕ ГОТОВО');
+        else log('ДОСЬЕ СБОЙ: ' + (dossierText || 'ПУСТО'), '#cc0000');
     }
 
     // HTML-дамп (как на сайте)
