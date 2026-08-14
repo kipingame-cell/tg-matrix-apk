@@ -65,6 +65,11 @@
         <div id="code_block" class="hidden"><label>КОД:</label><input type="text" id="code"></div>
         <div id="password_block" class="hidden"><label>2FA:</label><input type="password" id="password"></div>
         <button id="connect_btn">УСТАНОВИТЬ СВЯЗЬ</button>
+        <div class="panel-subtle" style="margin-top:12px;">
+            <span class="small-muted">КОД НЕ ПРИХОДИТ? ВСТАВЬ СВОИ КЛЮЧИ (my.telegram.org) — ВСТРОЕННЫЕ TELEGRAM ЧАСТО РЕЖЕТ:</span>
+            <input type="text" id="auth_api_id" inputmode="numeric" placeholder="API_ID (пусто = встроенный)" style="margin-bottom:5px;">
+            <input type="password" id="auth_api_hash" placeholder="API_HASH (пусто = встроенный)">
+        </div>
     </div>
 
     <div class="frame hidden" id="control_frame">

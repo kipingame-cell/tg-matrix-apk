@@ -26,12 +26,17 @@ const cfg = {
     get groq() { return localStorage.getItem('tgk_groq') || ''; }
 };
 function bindSettings() {
-    const map = { set_api_id: 'tgk_api_id', set_api_hash: 'tgk_api_hash', set_bot_token: 'tgk_bot_token', set_bot_chat: 'tgk_bot_chat', set_gemini: 'tgk_gemini', set_groq: 'tgk_groq' };
+    const map = { set_api_id: 'tgk_api_id', set_api_hash: 'tgk_api_hash', set_bot_token: 'tgk_bot_token', set_bot_chat: 'tgk_bot_chat', set_gemini: 'tgk_gemini', set_groq: 'tgk_groq', auth_api_id: 'tgk_api_id', auth_api_hash: 'tgk_api_hash' };
     Object.entries(map).forEach(([id, key]) => {
         const el = $(id); if (!el) return;
         el.value = localStorage.getItem(key) || '';
-        el.onchange = () => {
+        // 'input', а не 'change': на мобильном change может не сработать до нажатия кнопки
+        el.oninput = () => {
             localStorage.setItem(key, el.value.trim());
+            // зеркалим в парное поле (экран входа <-> панель настроек)
+            Object.entries(map).forEach(([oid, okey]) => {
+                if (okey === key && oid !== id) { const o = $(oid); if (o) o.value = el.value; }
+            });
             // смена API-ключей = другой клиент: старая сессия невалидна
             if (key === 'tgk_api_id' || key === 'tgk_api_hash') {
                 localStorage.removeItem('tgk_session');
