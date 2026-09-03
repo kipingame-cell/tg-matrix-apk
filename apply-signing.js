@@ -14,7 +14,7 @@ if (!g.includes('tgk.keystore')) {
 `android {
     signingConfigs {
         debug {
-            storeFile file('../../tgk.keystore')
+            storeFile file('../tgk.keystore')
             storePassword 'tgmatrix2026'
             keyAlias 'tgk'
             keyPassword 'tgmatrix2026'
