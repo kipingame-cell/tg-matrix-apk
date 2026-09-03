@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@capacitor/core": "^6.1.2",
+    "@capacitor/file-opener": "^6.0.1",
     "@capacitor/filesystem": "^6.0.1",
     "assert": "^2.1.0",
     "crypto-browserify": "^3.12.1",

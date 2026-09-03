@@ -5,6 +5,7 @@ import { computeCheck } from 'telegram/Password';
 import JSZip from 'jszip';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Capacitor } from '@capacitor/core';
+import { FileOpener } from '@capacitor/file-opener';
 
 const $ = (id) => document.getElementById(id);
 const log = (msg, color) => {
@@ -674,7 +675,12 @@ function showResults() {
 }
 
 async function saveZipToDevice() {
-    if (!lastResult) { const cached = localStorage.getItem('tgk_lastres'); return alert(cached ? 'АРХИВ УЖЕ БЫЛ ВЫДАН. ЗАПУСТИ НОВЫЙ ПЕРЕХВАТ ДЛЯ ФАЙЛА.' : 'НЕТ ДАННЫХ'); }
+    if (!lastResult) {
+        let cached = null;
+        try { cached = JSON.parse(localStorage.getItem('tgk_lastres')); } catch (e) {}
+        if (cached && cached.zipName) return openExportFile(cached.zipName);
+        return alert('НЕТ ДАННЫХ');
+    }
     try {
         if (Capacitor.isNativePlatform()) {
             await Filesystem.writeFile({
@@ -720,6 +726,26 @@ async function pushZipToBot() {
     } catch (e) { log('БОТ СБОЙ: ' + fmtErr(e), '#cc0000'); }
 }
 
+// --- ОТКРЫТИЕ ВЫГРУЗА С ДИСКА ---
+async function openExportFile(zipName) {
+    if (!zipName) return alert('НЕТ ДАННЫХ');
+    try {
+        if (Capacitor.isNativePlatform()) {
+            const { uri } = await Filesystem.getUri({ path: `tgkit_exports/${zipName}`, directory: Directory.Documents });
+            await FileOpener.open({ filePath: uri, contentType: 'application/zip' });
+        } else {
+            const f = await Filesystem.readFile({ path: `tgkit_exports/${zipName}`, directory: Directory.Documents });
+            const blob = await (await fetch('data:application/zip;base64,' + f.data)).blob();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = zipName;
+            a.click();
+        }
+    } catch (e) {
+        alert('ФАЙЛ НЕ НАЙДЕН НА УСТРОЙСТВЕ:\nДокументы/tgkit_exports/' + zipName + '\n\n(' + fmtErr(e) + ')');
+    }
+}
+
 // --- ЖУРНАЛ ВЫГРУЗОВ ---
 function getRegistry() { try { return JSON.parse(localStorage.getItem('tgk_registry') || '[]'); } catch (e) { return []; } }
 
@@ -746,6 +772,8 @@ function renderExports() {
         const d = new Date(e.date);
         const card = document.createElement('div');
         card.className = 'export-card';
+        card.style.cursor = 'pointer';
+        card.onclick = () => openExportFile(e.zipName);
         const badge = (on, t) => `<span class="ec-badge${on ? '' : ' off'}">${t}</span>`;
         card.innerHTML =
             `<div class="ec-name">${e.zipName}</div>` +
@@ -846,6 +874,11 @@ window.addEventListener('DOMContentLoaded', async () => {
         renderExports();
     };
     renderExports();
+
+    // Возврат из фона: восстановить кнопки результата
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && $('control_frame') && !$('control_frame').classList.contains('hidden')) showResults();
+    });
 
     // Автовход по сохранённой сессии
     if (localStorage.getItem('tgk_session')) {
