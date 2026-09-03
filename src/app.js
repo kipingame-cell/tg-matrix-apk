@@ -405,6 +405,8 @@ async function runExport() {
     const buildMedia = $('buildMedia') && $('buildMedia').checked;
     const mediaFiles = [];   // {name, data: Buffer}
     const exportMode = $('exportMode').value; // all|text|photo|video|photovideo|voice|media
+    // медиа-режимы сами тянут вложения, чекбокс не обязателен
+    const wantMedia = buildMedia || ['photo','video','photovideo','voice','media'].includes(exportMode);
     const mediaKind = (m) => {
         if (!m.media) return null;
         if (m.photo) return 'photo';
@@ -499,17 +501,24 @@ async function runExport() {
                 });
             }
 
-            // Превью медиа (как на сайте): миниатюры в zip/media/
+            // Медиа в архив: фото полноразмером (в фото-режимах), голос исходником, остальное — превью
             let mediaFile = null;
-            if (buildMedia && m.media) {
+            if (wantMedia && m.media) {
                 try {
                     await sleep(300 + Math.floor(Math.random() * 400));
-                    const buff = await client.downloadMedia(m, { thumb: 1 });
+                    const kind = mediaKind(m);
+                    const fullPhoto = kind === 'photo' && ['photo','photovideo','media'].includes(exportMode);
+                    const fullVoice = kind === 'voice' && exportMode === 'voice';
+                    const buff = (fullPhoto || fullVoice)
+                        ? await client.downloadMedia(m, {})
+                        : await client.downloadMedia(m, { thumb: 1 });
                     if (buff) {
-                        mediaFile = `media/preview_${m.id}.jpg`;
+                        mediaFile = fullPhoto ? `media/photo_${m.id}.jpg`
+                                  : fullVoice ? `media/voice_${m.id}.ogg`
+                                  : `media/preview_${m.id}.jpg`;
                         mediaFiles.push({ name: mediaFile, data: buff });
                     }
-                } catch (e) { /* превью не критично */ }
+                } catch (e) { /* медиа не критично */ }
             }
 
             const rec = {
@@ -612,7 +621,7 @@ async function runExport() {
     zip.file('messages.html', htmlDump);
     zip.file('messages.json', json);
     mediaFiles.forEach(f => zip.file(f.name, f.data));
-    if (mediaFiles.length) log(`МЕДИА: ${mediaFiles.length} превью в архиве`);
+    if (mediaFiles.length) log(`МЕДИА: ${mediaFiles.length} файлов в архиве`);
     if (graphText) zip.file('graph.graphml', graphText);
     if (buildHeatmap) zip.file('heatmap.json', heatJson);
     if (dossierText) zip.file('dossier.txt', dossierText);

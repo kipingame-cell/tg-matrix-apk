@@ -6,6 +6,7 @@
     <title>ТЕРМИНАЛ 'МАТРИЦА' // APK</title>
     <style>
         :root {
+            color-scheme: dark;
             --at-red: #cc0000; --at-cream: #f4e8d3; --at-black: #0e0e10;
             --at-steel: #5a5a5f; --at-grey: #2a2a2e; --font: 'JetBrains Mono', monospace;
         }
@@ -107,7 +108,7 @@
             <div><label>ЛИМИТ СООБЩЕНИЙ:</label><input type="number" id="limit" value="1000"></div>
         </div>
 
-        <div class="grid-2" style="margin-top: 10px;">
+        <div style="margin-top: 10px;">
             <div>
                 <label>ТИП КОНТЕНТА:</label>
                 <select id="exportMode">
@@ -149,6 +150,7 @@
             <label class="checkbox-group"><input type="checkbox" id="buildDossier"> ДОСЬЕ НКВД</label>
             <label class="checkbox-group"><input type="checkbox" id="buildMedia"> ПРЕВЬЮ МЕДИА</label>
         </div>
+        <span class="small-muted">ФОТО/ВИДЕО/ГОЛОСОВЫЕ РЕЖИМЫ ТЯНУТ ФАЙЛЫ В АРХИВ АВТОМАТОМ.</span>
 
         <button id="export_btn">🚀 ЗАПУСТИТЬ СКАНИРОВАНИЕ</button>
         <button id="download_btn" class="success-btn hidden" style="margin-bottom: 15px; background: #f4e8d3; color: #000;">📥 СКАЧАТЬ АРХИВ</button>
