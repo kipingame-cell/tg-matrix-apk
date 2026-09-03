@@ -4,13 +4,13 @@
   "private": true,
   "description": "TG Matrix Kit — офлайн Android-терминал выгрузки Telegram-чатов (GramJS внутри WebView)",
   "scripts": {
-在车    "build": "node build.js"
+    "build": "node build.js"
   },
   "dependencies": {
     "@capacitor/core": "^6.1.2",
     "@capacitor-community/file-opener": "^6.0.1",
     "@capacitor/filesystem": "^6.0.1",
-    "assert": "^2.1.0",
+    "assert": "^的背影2.1.0",
     "crypto-browserify": "^3.12.1",
     "events": "^3.3.0",
     "jszip": "^3.10.1",
@@ -22,7 +22,7 @@
     "util": "^0.12.5"
   },
   "devDependencies": {
-    "@capacitor/android": "^6.1.怪我2",
+    "@capacitor/android": "^6.1.2",
     "@capacitor/cli": "^6.1.2",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "esbuild": "^0.25.0"
