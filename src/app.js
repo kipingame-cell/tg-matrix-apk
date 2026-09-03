@@ -404,7 +404,36 @@ async function runExport() {
     const buildDossier = $('buildDossier').checked;
     const buildMedia = $('buildMedia') && $('buildMedia').checked;
     const mediaFiles = [];   // {name, data: Buffer}
-    const textOnly = $('exportMode').value === 'text';
+    const exportMode = $('exportMode').value; // all|text|photo|video|photovideo|voice|media
+    const mediaKind = (m) => {
+        if (!m.media) return null;
+        if (m.photo) return 'photo';
+        if (m.video) return 'video';
+        if (m.voice) return 'voice';
+        if (m.audio) return 'audio';
+        if (m.gif) return 'video';
+        if (m.sticker) return 'sticker';
+        if (m.document) {
+            const attrs = m.document.attributes || [];
+            if (attrs.some(a => (a.className || '') === 'DocumentAttributeVideo')) return 'video';
+            if (attrs.some(a => (a.className || '') === 'DocumentAttributeAudio' && a.voice)) return 'voice';
+            if (attrs.some(a => (a.className || '') === 'DocumentAttributeAudio')) return 'audio';
+            return 'file';
+        }
+        return 'other';
+    };
+    const modePass = (m, text) => {
+        const kind = mediaKind(m);
+        switch (exportMode) {
+            case 'text': return !!text;
+            case 'photo': return kind === 'photo';
+            case 'video': return kind === 'video';
+            case 'photovideo': return kind === 'photo' || kind === 'video';
+            case 'voice': return kind === 'voice';
+            case 'media': return kind !== null;
+            default: return true; // all
+        }
+    };
 
     log('ЦЕЛЬ ЗАХВАЧЕНА. НАЧИНАЮ ПЕРЕХВАТ...');
 
@@ -438,7 +467,7 @@ async function runExport() {
 
             if (m.action) continue; // системный мусор
             const text = m.message || '';
-            if (textOnly && !text) continue;
+            if (!modePass(m, text)) continue;
             const tsMs = m.date * 1000;
             if (df && tsMs < df) break;      // лента идёт от новых к старым
             if (dt && tsMs > dt) continue;
