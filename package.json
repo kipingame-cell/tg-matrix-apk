@@ -10,7 +10,7 @@
     "@capacitor/core": "^6.1.2",
     "@capacitor-community/file-opener": "^6.0.1",
     "@capacitor/filesystem": "^6.0.1",
-    "assert": "^的背影2.1.0",
+    "assert": "^2.1.0",
     "crypto-browserify": "^3.12.1",
     "events": "^3.3.0",
     "jszip": "^3.10.1",
