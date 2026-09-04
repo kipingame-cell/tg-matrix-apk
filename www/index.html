@@ -10,14 +10,18 @@
             --at-red: #cc0000; --at-cream: #f4e8d3; --at-black: #0e0e10;
             --at-steel: #5a5a5f; --at-grey: #2a2a2e; --font: 'JetBrains Mono', monospace;
         }
+        * { box-sizing: border-box; }
+        html, body { overflow-x: hidden; max-width: 100%; }
         body { background-color: var(--at-black); color: var(--at-cream); font-family: var(--font); margin: 0; padding: 10px 10px 80px 10px; background-image: radial-gradient(var(--at-grey) 1px, transparent 1px); background-size: 25px 25px; }
         .container { max-width: 600px; margin: 0 auto; }
         .frame { border: 3px solid var(--at-steel); background: rgba(20, 20, 23, 0.95); padding: 20px; margin-bottom: 25px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.9); }
         .section-title { position: absolute; top: -14px; left: 15px; background: var(--at-red); color: #fff; padding: 2px 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
         label { display: block; font-size: 9px; text-transform: uppercase; color: var(--at-steel); margin: 12px 0 4px 0; font-weight: bold; }
-        input, select { width: 100%; background: #000; border: 1px solid var(--at-steel); color: var(--at-cream); padding: 10px; box-sizing: border-box; font-family: var(--font); font-size: 13px; border-radius: 0; }
+        input, select { width: 100%; min-width: 0; max-width: 100%; background: #000; border: 1px solid var(--at-steel); color: var(--at-cream); padding: 10px; box-sizing: border-box; font-family: var(--font); font-size: 13px; border-radius: 0; }
         input:focus, select:focus { border-color: var(--at-red); outline: none; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid-2 > * { min-width: 0; }
+        input[type="datetime-local"] { font-size: 11px; padding: 9px 4px; }
         hr { border: 0; border-top: 1px solid var(--at-grey); margin: 20px 0; }
         button { width: 100%; padding: 14px; background: var(--at-cream); border: none; color: #000; font-weight: bold; text-transform: uppercase; cursor: pointer; margin-top: 10px; border-bottom: 4px solid var(--at-steel); font-family: var(--font); }
         button:active { transform: translateY(2px); border-bottom-width: 2px; }
@@ -78,9 +82,9 @@
         <button class="danger-btn" style="padding:4px; font-size:9px;" id="btn_logout_control">ВЫХОД</button>
         <label>ЦЕЛЬ СКАНИРОВАНИЯ:</label>
         <div class="panel-subtle" style="padding: 10px; border-color: #333; margin-bottom: 10px;">
-            <div style="display:flex; gap:8px; margin-bottom: 8px;">
-                <input type="text" id="chat_search" placeholder="ПОИСК ПО БАЗЕ..." style="font-size: 11px; flex:1;">
-                <select id="chat_sort" style="font-size: 11px; width:130px;">
+            <div style="display:flex; flex-wrap: nowrap; gap:6px; margin-bottom: 8px;">
+                <input type="text" id="chat_search" placeholder="ПОИСК ПО БАЗЕ..." style="font-size: 11px; flex:1; min-width: 0;">
+                <select id="chat_sort" style="font-size: 11px; width:118px; flex: 0 0 auto;">
                     <option value="az">СОРТ: А - Я</option>
                     <option value="za">СОРТ: Я - А</option>
                 </select>
