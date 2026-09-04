@@ -405,6 +405,7 @@ async function runExport() {
     const buildDossier = $('buildDossier').checked;
     const buildMedia = $('buildMedia') && $('buildMedia').checked;
     const mediaFiles = [];   // {name, data: Buffer}
+    let mediaOk = 0, mediaErr = 0;
     const exportMode = $('exportMode').value; // all|text|photo|video|photovideo|voice|media
     // медиа-режимы сами тянут вложения, чекбокс не обязателен
     const wantMedia = buildMedia || ['photo','video','photovideo','voice','media'].includes(exportMode);
@@ -502,24 +503,36 @@ async function runExport() {
                 });
             }
 
-            // Медиа в архив: фото полноразмером (в фото-режимах), голос исходником, остальное — превью
+            // Медиа в архив: фото полноразмером (в фото-режимах), голос исходником, остальное — превью.
+            // Превью может не существовать (нет нужного thumb) — тогда качаем оригинал как запасной вариант.
             let mediaFile = null;
             if (wantMedia && m.media) {
+                await sleep(300 + Math.floor(Math.random() * 400));
+                const kind = mediaKind(m);
+                const fullPhoto = kind === 'photo' && ['photo','photovideo','media'].includes(exportMode);
+                const fullVoice = kind === 'voice' && exportMode === 'voice';
+                let buff = null, err1 = null;
                 try {
-                    await sleep(300 + Math.floor(Math.random() * 400));
-                    const kind = mediaKind(m);
-                    const fullPhoto = kind === 'photo' && ['photo','photovideo','media'].includes(exportMode);
-                    const fullVoice = kind === 'voice' && exportMode === 'voice';
-                    const buff = (fullPhoto || fullVoice)
+                    buff = (fullPhoto || fullVoice)
                         ? await client.downloadMedia(m, {})
                         : await client.downloadMedia(m, { thumb: 1 });
-                    if (buff) {
-                        mediaFile = fullPhoto ? `media/photo_${m.id}.jpg`
-                                  : fullVoice ? `media/voice_${m.id}.ogg`
-                                  : `media/preview_${m.id}.jpg`;
-                        mediaFiles.push({ name: mediaFile, data: buff });
+                } catch (e) { err1 = e; }
+                if (!buff) {
+                    // запасной путь: полное скачивание
+                    try { buff = await client.downloadMedia(m, {}); } catch (e2) {
+                        mediaErr++;
+                        if (mediaErr <= 3) log(`МЕДИА СБОЙ [${m.id}, ${kind}]: ` + fmtErr(e2 || err1), '#fbc02d');
                     }
-                } catch (e) { /* медиа не критично */ }
+                }
+                if (buff && buff.length) {
+                    const ext = fullVoice ? 'ogg' : 'jpg';
+                    mediaFile = (fullPhoto || fullVoice) ? `media/${kind}_${m.id}.${ext}` : `media/preview_${m.id}.jpg`;
+                    mediaFiles.push({ name: mediaFile, data: buff });
+                    mediaOk++;
+                } else if (err1) {
+                    mediaErr++;
+                    if (mediaErr <= 3) log(`МЕДИА СБОЙ [${m.id}, ${kind}]: ` + fmtErr(err1), '#fbc02d');
+                }
             }
 
             const rec = {
@@ -623,6 +636,7 @@ async function runExport() {
     zip.file('messages.json', json);
     mediaFiles.forEach(f => zip.file(f.name, f.data));
     if (mediaFiles.length) log(`МЕДИА: ${mediaFiles.length} файлов в архиве`);
+    else if (wantMedia) log(`МЕДИА: 0 файлов (скачано ${mediaOk}, ошибок ${mediaErr})`, mediaErr ? '#fbc02d' : undefined);
     if (graphText) zip.file('graph.graphml', graphText);
     if (buildHeatmap) zip.file('heatmap.json', heatJson);
     if (dossierText) zip.file('dossier.txt', dossierText);
