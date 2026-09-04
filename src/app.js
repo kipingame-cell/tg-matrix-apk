@@ -237,11 +237,15 @@ async function selectChat(id, name) {
         }
     }
 
-    // Участники (для фильтра и резолва @username)
+    // Участники (для фильтра и резолва @username).
+    // getParticipants на части чатов виснет без ответа — таймаут 30с, выгрузке список не нужен.
     const uDrop = $('fromUser');
     uDrop.innerHTML = '<option value="">СКАНИРОВАНИЕ...</option>';
     try {
-        const parts = await client.getParticipants(ent, { limit: 400 });
+        const parts = await Promise.race([
+            client.getParticipants(ent, { limit: 400 }),
+            new Promise((_, rej) => setTimeout(() => rej(new Error('ТАЙМАУТ 30С')), 30000))
+        ]);
         window._usernameMap = new Map();
         uDrop.innerHTML = `<option value="">ВСЕ УЧАСТНИКИ (${parts.length})</option>`;
         parts.forEach(p => {
@@ -252,7 +256,8 @@ async function selectChat(id, name) {
         });
     } catch (e) {
         window._usernameMap = new Map();
-        uDrop.innerHTML = '<option value="">УЧАСТНИКИ НЕДОСТУПНЫ</option>';
+        uDrop.innerHTML = '<option value="">ВСЕ УЧАСТНИКИ (СПИСОК НЕДОСТУПЕН)</option>';
+        log('УЧАСТНИКИ: ' + fmtErr(e) + ' — выгрузке не мешает', '#fbc02d');
     }
 }
 
@@ -477,6 +482,7 @@ async function runExport() {
             if (dt && tsMs > dt) continue;
             const sid = m.senderId ? m.senderId.toString() : (m.fromId ? m.fromId.toString() : null);
             if (fromUser && sid !== fromUser) continue;
+
             if (kwList.length && !kwList.some(k => text.toLowerCase().includes(k))) continue;
 
             // Имя отправителя прямо из сообщения — без лишних запросов к API
