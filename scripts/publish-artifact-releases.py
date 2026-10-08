@@ -55,8 +55,8 @@ def publish(repo, run, files, directory, dry_run=False):
         release = api(f'repos/{repo}/releases/{release["id"]}')
         assets = {a['name']: a for a in release['assets']}
         if p.name not in assets:
-            gh('api', '--hostname', 'uploads.github.com', '--method', 'POST',
-               f'repos/{repo}/releases/{release["id"]}/assets?name={p.name}',
+            gh('api', '--method', 'POST',
+               f'https://uploads.github.com/repos/{repo}/releases/{release["id"]}/assets?name={p.name}',
                '-H', 'Content-Type: application/octet-stream', '--input', str(p))
             release = api(f'repos/{repo}/releases/{release["id"]}')
             assets = {a['name']: a for a in release['assets']}
