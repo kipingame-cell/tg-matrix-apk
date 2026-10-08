@@ -24,58 +24,55 @@ def pages(path, key=None):
 
 def publish(repo, run, files, directory, dry_run=False):
     tag = f'build-{run["run_number"]}-{run["head_sha"][:12]}'
-    archive_commit = gh('api', f'repos/{repo}/git/ref/heads/main').stdout
-    archive_commit = json.loads(archive_commit)['object']['sha']
     sums = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
     if dry_run:
-        print(json.dumps({'tag':tag,'source':run['head_sha'],'sha256':sums}))
+        print(json.dumps({'tag': tag, 'source': run['head_sha'], 'sha256': sums}))
         return
-    probe = gh('api', f'repos/{repo}/releases/tags/{tag}', check=False)
-    if probe.returncode:
-        if '404' not in probe.stderr:
-            raise RuntimeError(probe.stderr)
-        notes = pathlib.Path(directory)/'notes.md'
-        notes.write_text(
-            f'Сохранённая успешная сборка #{run["run_number"]}.\n\n'
-            f'Исходный коммит сборки: {run["head_sha"]}.\nСнимок архивного тега: {archive_commit}.\nWorkflow: {run["name"]}.\n'
-            f'Исходный запуск: {run["html_url"]}.\n\n'
-            'Файлы перенесены из артефактов этой сборки без пересборки. Тег указывает на снимок архива, а исходники конкретной сборки — на исходный коммит выше. '
-            'APK является debug-сборкой; физическая установка здесь не проверялась. '
-            'Постоянство сертификата обновлений зависит от настроек проекта. '
-            'Контрольные суммы находятся в SHA256SUMS.txt.\n',encoding='utf-8')
-        args=['release','create',tag,'--repo',repo,'--target',archive_commit,
-              '--title',f'{repo.split("/")[1]} · build {run["run_number"]}',
-              '--notes-file',str(notes),'--draft','--latest=false']
-        if any(p.suffix=='.apk' for p in files):
-            args.append('--prerelease')
-        gh(*args)
-        release=api(f'repos/{repo}/releases/tags/{tag}')
+    directory = pathlib.Path(directory)
+    matches = [r for r in pages(f'repos/{repo}/releases') if r['tag_name'] == tag]
+    if matches:
+        release = max(matches, key=lambda r: (len(r['assets']), -r['id']))
     else:
-        release=json.loads(probe.stdout)
-    assets={a['name']:a for a in release['assets']}
-    checksum=pathlib.Path(directory)/'SHA256SUMS.txt'
-    checksum.write_text(''.join(f'{sums[p.name]}  {p.name}\n' for p in sorted(files)),encoding='utf-8')
-    for p in [*files,checksum]:
-        if p.name in assets:
-            downloaded=pathlib.Path(directory)/'verify'/p.name
-            downloaded.parent.mkdir(parents=True,exist_ok=True)
-            with downloaded.open('wb') as stream:
-                result=subprocess.run(['gh','api',f'repos/{repo}/releases/assets/{assets[p.name]["id"]}',
-                                       '-H','Accept: application/octet-stream'],stdout=stream,stderr=subprocess.PIPE)
-            if result.returncode or hashlib.sha256(downloaded.read_bytes()).digest()!=hashlib.sha256(p.read_bytes()).digest():
-                raise RuntimeError(f'Existing asset differs, refusing overwrite: {tag}/{p.name}')
-        else:
-            gh('release','upload',tag,str(p),'--repo',repo)
-    # Verify the uploaded bytes before exposing a draft release.
-    verify=pathlib.Path(directory)/'verify-all'
-    verify.mkdir()
-    gh('release','download',tag,'--repo',repo,'--dir',str(verify))
-    for p in [*files,checksum]:
-        if hashlib.sha256((verify/p.name).read_bytes()).digest()!=hashlib.sha256(p.read_bytes()).digest():
-            raise RuntimeError(f'Download verification failed: {tag}/{p.name}')
+        archive_commit = api(f'repos/{repo}/git/ref/heads/main')['object']['sha']
+        notes = (
+            f'Сохранённая успешная сборка #{run["run_number"]}.\n\n'
+            f'Исходный коммит сборки: {run["head_sha"]}.\nСнимок архивного тега: {archive_commit}.\n'
+            f'Workflow: {run["name"]}.\nИсходный запуск: {run["html_url"]}.\n\n'
+            'Файлы перенесены из артефактов этой сборки без пересборки. Тег указывает на снимок архива; '
+            'исходники конкретной сборки доступны по исходному коммиту выше. '
+            'Контрольные суммы находятся в SHA256SUMS.txt.\n'
+        )
+        if any(p.suffix == '.apk' for p in files):
+            notes += 'APK является debug-сборкой; физическая установка здесь не проверялась. Постоянство сертификата обновлений зависит от настроек проекта.\n'
+        payload = directory / 'release-request.json'
+        payload.write_text(json.dumps({'tag_name': tag, 'target_commitish': archive_commit,
+            'name': f'{repo.split("/")[1]} · build {run["run_number"]}', 'body': notes,
+            'draft': True, 'prerelease': any(p.suffix == '.apk' for p in files), 'make_latest': 'false'}))
+        release = json.loads(gh('api', '--method', 'POST', f'repos/{repo}/releases', '--input', str(payload)).stdout)
+    checksum = directory / 'SHA256SUMS.txt'
+    checksum.write_text(''.join(f'{sums[p.name]}  {p.name}\n' for p in sorted(files)), encoding='utf-8')
+    for p in [*files, checksum]:
+        release = api(f'repos/{repo}/releases/{release["id"]}')
+        assets = {a['name']: a for a in release['assets']}
+        if p.name not in assets:
+            gh('api', '--hostname', 'uploads.github.com', '--method', 'POST',
+               f'repos/{repo}/releases/{release["id"]}/assets?name={p.name}',
+               '-H', 'Content-Type: application/octet-stream', '--input', str(p))
+            release = api(f'repos/{repo}/releases/{release["id"]}')
+            assets = {a['name']: a for a in release['assets']}
+        downloaded = directory / 'verify' / p.name
+        downloaded.parent.mkdir(parents=True, exist_ok=True)
+        with downloaded.open('wb') as stream:
+            result = subprocess.run(['gh', 'api', f'repos/{repo}/releases/assets/{assets[p.name]["id"]}',
+                '-H', 'Accept: application/octet-stream'], stdout=stream, stderr=subprocess.PIPE)
+        if result.returncode or hashlib.sha256(downloaded.read_bytes()).digest() != hashlib.sha256(p.read_bytes()).digest():
+            raise RuntimeError(f'Asset differs; refusing overwrite or publication: {tag}/{p.name}')
     if release['draft']:
-        gh('release','edit',tag,'--repo',repo,'--draft=false','--latest=false')
-    print(f'Published and downloaded-byte verified: {tag}',flush=True)
+        payload = directory / 'publish-request.json'
+        payload.write_text(json.dumps({'draft': False, 'make_latest': 'false'}))
+        gh('api', '--method', 'PATCH', f'repos/{repo}/releases/{release["id"]}', '--input', str(payload))
+    print(f'Published and downloaded-byte verified: {tag}', flush=True)
+
 
 def main():
     parser=argparse.ArgumentParser()
