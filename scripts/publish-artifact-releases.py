@@ -24,6 +24,8 @@ def pages(path, key=None):
 
 def publish(repo, run, files, directory, dry_run=False):
     tag = f'build-{run["run_number"]}-{run["head_sha"][:12]}'
+    archive_commit = gh('api', f'repos/{repo}/git/ref/heads/main').stdout
+    archive_commit = json.loads(archive_commit)['object']['sha']
     sums = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
     if dry_run:
         print(json.dumps({'tag':tag,'source':run['head_sha'],'sha256':sums}))
@@ -35,13 +37,13 @@ def publish(repo, run, files, directory, dry_run=False):
         notes = pathlib.Path(directory)/'notes.md'
         notes.write_text(
             f'Сохранённая успешная сборка #{run["run_number"]}.\n\n'
-            f'Исходный коммит: {run["head_sha"]}.\nWorkflow: {run["name"]}.\n'
+            f'Исходный коммит сборки: {run["head_sha"]}.\nСнимок архивного тега: {archive_commit}.\nWorkflow: {run["name"]}.\n'
             f'Исходный запуск: {run["html_url"]}.\n\n'
-            'Файлы перенесены из артефактов этой сборки без пересборки. '
+            'Файлы перенесены из артефактов этой сборки без пересборки. Тег указывает на снимок архива, а исходники конкретной сборки — на исходный коммит выше. '
             'APK является debug-сборкой; физическая установка здесь не проверялась. '
             'Постоянство сертификата обновлений зависит от настроек проекта. '
             'Контрольные суммы находятся в SHA256SUMS.txt.\n',encoding='utf-8')
-        args=['release','create',tag,'--repo',repo,'--target',run['head_sha'],
+        args=['release','create',tag,'--repo',repo,'--target',archive_commit,
               '--title',f'{repo.split("/")[1]} · build {run["run_number"]}',
               '--notes-file',str(notes),'--draft','--latest=false']
         if any(p.suffix=='.apk' for p in files):
