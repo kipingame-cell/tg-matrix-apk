@@ -1,0 +1,30 @@
+name: Publish retained build artifacts
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/publish-artifact-releases.py
+      - .github/workflows/publish-artifact-releases.yml
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["ТГВыгруз"]
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: publish-retained-artifacts
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Preserve all retained successful main-branch builds
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/publish-artifact-releases.py --workflow "ТГВыгруз"
