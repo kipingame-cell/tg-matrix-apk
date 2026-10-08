@@ -55,11 +55,10 @@ def publish(repo, run, files, directory, dry_run=False):
         release = api(f'repos/{repo}/releases/{release["id"]}')
         assets = {a['name']: a for a in release['assets']}
         if p.name not in assets:
-            gh('api', '--method', 'POST',
+            uploaded = json.loads(gh('api', '--method', 'POST',
                f'https://uploads.github.com/repos/{repo}/releases/{release["id"]}/assets?name={p.name}',
-               '-H', 'Content-Type: application/octet-stream', '--input', str(p))
-            release = api(f'repos/{repo}/releases/{release["id"]}')
-            assets = {a['name']: a for a in release['assets']}
+               '-H', 'Content-Type: application/octet-stream', '--input', str(p)).stdout)
+            assets[p.name] = uploaded
         downloaded = directory / 'verify' / p.name
         downloaded.parent.mkdir(parents=True, exist_ok=True)
         with downloaded.open('wb') as stream:
