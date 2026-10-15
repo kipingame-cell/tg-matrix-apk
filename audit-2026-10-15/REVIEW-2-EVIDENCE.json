@@ -1,0 +1,235 @@
+{
+  "repo": "tg-matrix-apk",
+  "source_commit": "a20cdeb598fd9614643c08a3ba9568b9c33b5a31",
+  "source_tree": "c716f9796b51ec0215906ec6dd5f9dd45dbf64d0",
+  "date": "2026-10-15",
+  "structure": {
+    "repo": "tg-matrix-apk",
+    "blobs": 24,
+    "bytes": 235815,
+    "workflow_files": [
+      ".github/workflows/build.yml",
+      ".github/workflows/publish-artifact-releases.yml"
+    ],
+    "lockfiles": [],
+    "licenses": [],
+    "readme_broken_links": []
+  },
+  "releases_first_10": [
+    {
+      "tag": "build-1-08a05136931e",
+      "draft": true,
+      "prerelease": true,
+      "assets": []
+    },
+    {
+      "tag": "",
+      "draft": true,
+      "prerelease": false,
+      "assets": [
+        {
+          "name": "app-debug.apk",
+          "bytes": 4573022,
+          "digest": "sha256:29804242c794c18c0607fefab7643e838f3f38a1cfbcd3c199faaf8fc3990c86"
+        }
+      ]
+    },
+    {
+      "tag": "build-9-3590911dfce2",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        {
+          "name": "SHA256SUMS.txt",
+          "bytes": 98,
+          "digest": "sha256:68fef27a6a273a57306847bf8e042a2d228bb43eecfa93fb7c7965db0b81c936"
+        },
+        {
+          "name": "tg-matrix-kit-apk-app-debug.apk",
+          "bytes": 4569125,
+          "digest": "sha256:aefbb545482dc0e5948352f62b86831c9442e8f6841350f68327a26336f447f5"
+        }
+      ]
+    },
+    {
+      "tag": "build-8-c6a0e7027a34",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        {
+          "name": "SHA256SUMS.txt",
+          "bytes": 98,
+          "digest": "sha256:0ee48ba93b1ebfeb6ca52b4f3dda956e71d45787eb467473b307c2c65d024f0c"
+        },
+        {
+          "name": "tg-matrix-kit-apk-app-debug.apk",
+          "bytes": 4569140,
+          "digest": "sha256:ef183cd1d1c1c830ef93c16911fbd58badce91ec5aaa80e3ced87f86edb432f2"
+        }
+      ]
+    },
+    {
+      "tag": "build-40-2b1b0e3910d5",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        {
+          "name": "SHA256SUMS.txt",
+          "bytes": 98,
+          "digest": "sha256:8c26a5e5b4608d46babfc7278f6d1991ed98def9e43a3dfabe36d3e25deec331"
+        },
+        {
+          "name": "tg-matrix-kit-apk-app-debug.apk",
+          "bytes": 4585872,
+          "digest": "sha256:c38156af4d8258f4b6b51f26024b7be2d6eb24f096bacc8b3cb8ac0e32d91078"
+        }
+      ]
+    },
+    {
+      "tag": "build-4-5984898e4d1c",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        {
+          "name": "SHA256SUMS.txt",
+          "bytes": 98,
+          "digest": "sha256:2eece862b5be15377464d93e637e2dac3dbb525595ffbe58505a8f35297595a8"
+        },
+        {
+          "name": "tg-matrix-kit-apk-app-debug.apk",
+          "bytes": 4271908,
+          "digest": "sha256:152b4a07e8260d4311625333423d358d0e1d0754322bc374dfe8042fe92b8e4e"
+        }
+      ]
+    },
+    {
+      "tag": "build-39-fc921d6fa711",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        {
+          "name": "SHA256SUMS.txt",
+          "bytes": 98,
+          "digest": "sha256:8c26a5e5b4608d46babfc7278f6d1991ed98def9e43a3dfabe36d3e25deec331"
+        },
+        {
+          "name": "tg-matrix-kit-apk-app-debug.apk",
+          "bytes": 4585872,
+          "digest": "sha256:c38156af4d8258f4b6b51f26024b7be2d6eb24f096bacc8b3cb8ac0e32d91078"
+        }
+      ]
+    },
+    {
+      "tag": "build-38-71af19ef6319",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        {
+          "name": "SHA256SUMS.txt",
+          "bytes": 98,
+          "digest": "sha256:8c26a5e5b4608d46babfc7278f6d1991ed98def9e43a3dfabe36d3e25deec331"
+        },
+        {
+          "name": "tg-matrix-kit-apk-app-debug.apk",
+          "bytes": 4585872,
+          "digest": "sha256:c38156af4d8258f4b6b51f26024b7be2d6eb24f096bacc8b3cb8ac0e32d91078"
+        }
+      ]
+    },
+    {
+      "tag": "build-37-617b0f9cd08f",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        {
+          "name": "SHA256SUMS.txt",
+          "bytes": 98,
+          "digest": "sha256:8c26a5e5b4608d46babfc7278f6d1991ed98def9e43a3dfabe36d3e25deec331"
+        },
+        {
+          "name": "tg-matrix-kit-apk-app-debug.apk",
+          "bytes": 4585872,
+          "digest": "sha256:c38156af4d8258f4b6b51f26024b7be2d6eb24f096bacc8b3cb8ac0e32d91078"
+        }
+      ]
+    },
+    {
+      "tag": "build-36-e4bb267fb295",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        {
+          "name": "SHA256SUMS.txt",
+          "bytes": 98,
+          "digest": "sha256:8c26a5e5b4608d46babfc7278f6d1991ed98def9e43a3dfabe36d3e25deec331"
+        },
+        {
+          "name": "tg-matrix-kit-apk-app-debug.apk",
+          "bytes": 4585872,
+          "digest": "sha256:c38156af4d8258f4b6b51f26024b7be2d6eb24f096bacc8b3cb8ac0e32d91078"
+        }
+      ]
+    }
+  ],
+  "runs_latest_5": [
+    {
+      "id": 38544940284,
+      "name": "Read-only APK and artifact audit",
+      "head_sha": "d732cba4e998630beb4b0a6bae1a272527912a1f",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 38544365124,
+      "name": "Read-only APK and artifact audit",
+      "head_sha": "19e1c9d885ed5797b15c470fecbf60ff401079d4",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 37757748231,
+      "name": "Publish retained build artifacts",
+      "head_sha": "2b1b0e3910d56aca122a5fcbecbfb30e1d9c9d9f",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 37757549421,
+      "name": "ТГВыгруз",
+      "head_sha": "2b1b0e3910d56aca122a5fcbecbfb30e1d9c9d9f",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 37757549369,
+      "name": "Publish retained build artifacts",
+      "head_sha": "2b1b0e3910d56aca122a5fcbecbfb30e1d9c9d9f",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "apk": {
+    "repo": "tg-matrix-apk",
+    "tag": "build-9-3590911dfce2",
+    "status": "inspected binary",
+    "asset_id": 621366740,
+    "source": "downloaded release asset",
+    "bytes": 4569125,
+    "sha256": "aefbb545482dc0e5948352f62b86831c9442e8f6841350f68327a26336f447f5",
+    "expected_digest": "aefbb545482dc0e5948352f62b86831c9442e8f6841350f68327a26336f447f5"
+  },
+  "findings": [
+    {
+      "id": "TG-MATRIX-APK-R2-APK",
+      "priority": "P2",
+      "title": "Опубликованный установщик имеет debuggable=true",
+      "file": ".github/workflows/build.yml",
+      "line": 39,
+      "proof": "Проверен APK build-9-3590911dfce2, asset 621366740. SHA-256 aefbb545482dc0e5948352f62b86831c9442e8f6841350f68327a26336f447f5 совпал с GitHub digest. apksigner verify: 0; aapt dump badging: application-debuggable. Сертификат — Android Debug. Это проверка настоящего бинарника, а не предположение по имени файла.",
+      "impact": "Development-сборка не отделена технически от установщика, который пользователь получает из Releases. Для production требуется отдельный режим выпуска. Это не доказательство удалённого взлома и не означает, что подпись математически некорректна.",
+      "fix": "Выделить production-выпуск с debuggable=false, приватной стабильной подписью, неизменяемыми версиями и проверкой upgrade. Development APK явно маркировать.",
+      "acceptance": "aapt на production APK не выводит application-debuggable; сертификат совпадает между последовательными production версиями; обновление сохраняет данные."
+    }
+  ],
+  "reproductions": []
+}

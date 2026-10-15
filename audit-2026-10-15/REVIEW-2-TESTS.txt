@@ -1,0 +1,250 @@
+APK RELEASE CHECK
+tag=build-9-3590911dfce2
+sha256=aefbb545482dc0e5948352f62b86831c9442e8f6841350f68327a26336f447f5
+source=downloaded release asset
+Verifies
+Verified using v1 scheme (JAR signing): true
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): false
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: C=US, O=Android, CN=Android Debug
+Signer #1 certificate SHA-256 digest: 611f4d8389c8d8d743298dce94319b8eef253cb3ccfa64c8525b970d13766f01
+Signer #1 certificate SHA-1 digest: d389956b470d3aa16bdf37034517acf5664319aa
+Signer #1 certificate MD5 digest: 4c77c7e08b36b98474d1be57909ea5c7
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 2048
+Signer #1 public key SHA-256 digest: 469d1871fc543d37fedac3d90941ab9828ddc91eeae6812dbc301da25e668882
+Signer #1 public key SHA-1 digest: 9b51b7a9bd5d65bf5faf785ffe18756ad7042525
+Signer #1 public key MD5 digest: bbfc8e1efa2c00195c042961df639647
+WARNING: META-INF/com/android/build/gradle/app-metadata.properties not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.activity_activity.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.annotation_annotation-experimental.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.appcompat_appcompat-resources.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.appcompat_appcompat.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.arch.core_core-runtime.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.coordinatorlayout_coordinatorlayout.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.core_core-ktx.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.core_core-splashscreen.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.core_core.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.cursoradapter_cursoradapter.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.customview_customview.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.drawerlayout_drawerlayout.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.emoji2_emoji2-views-helper.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.emoji2_emoji2.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.fragment_fragment.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.interpolator_interpolator.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.lifecycle_lifecycle-livedata-core.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.lifecycle_lifecycle-livedata.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.lifecycle_lifecycle-process.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.lifecycle_lifecycle-runtime.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.lifecycle_lifecycle-viewmodel-savedstate.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.lifecycle_lifecycle-viewmodel.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.loader_loader.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.profileinstaller_profileinstaller.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.savedstate_savedstate.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.startup_startup-runtime.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.tracing_tracing.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.vectordrawable_vectordrawable-animated.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.vectordrawable_vectordrawable.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.versionedparcelable_versionedparcelable.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.viewpager_viewpager.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/androidx.webkit_webkit.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/kotlinx_coroutines_android.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/kotlinx_coroutines_core.version not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/services/kotlinx.coroutines.CoroutineExceptionHandler not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+WARNING: META-INF/services/kotlinx.coroutines.internal.MainDispatcherFactory not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.
+package: name='com.kipingame.tgkit' versionCode='1' versionName='1.0' platformBuildVersionName='14' platformBuildVersionCode='34' compileSdkVersion='34' compileSdkVersionCodename='14'
+sdkVersion:'22'
+targetSdkVersion:'34'
+uses-permission: name='android.permission.INTERNET'
+uses-permission: name='com.kipingame.tgkit.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'
+application-label:'TG Matrix Kit'
+application-label-af:'TG Matrix Kit'
+application-label-am:'TG Matrix Kit'
+application-label-ar:'TG Matrix Kit'
+application-label-as:'TG Matrix Kit'
+application-label-az:'TG Matrix Kit'
+application-label-be:'TG Matrix Kit'
+application-label-bg:'TG Matrix Kit'
+application-label-bn:'TG Matrix Kit'
+application-label-bs:'TG Matrix Kit'
+application-label-ca:'TG Matrix Kit'
+application-label-cs:'TG Matrix Kit'
+application-label-da:'TG Matrix Kit'
+application-label-de:'TG Matrix Kit'
+application-label-el:'TG Matrix Kit'
+application-label-en-AU:'TG Matrix Kit'
+application-label-en-CA:'TG Matrix Kit'
+application-label-en-GB:'TG Matrix Kit'
+application-label-en-IN:'TG Matrix Kit'
+application-label-en-XC:'TG Matrix Kit'
+application-label-es:'TG Matrix Kit'
+application-label-es-US:'TG Matrix Kit'
+application-label-et:'TG Matrix Kit'
+application-label-eu:'TG Matrix Kit'
+application-label-fa:'TG Matrix Kit'
+application-label-fi:'TG Matrix Kit'
+application-label-fr:'TG Matrix Kit'
+application-label-fr-CA:'TG Matrix Kit'
+application-label-gl:'TG Matrix Kit'
+application-label-gu:'TG Matrix Kit'
+application-label-hi:'TG Matrix Kit'
+application-label-hr:'TG Matrix Kit'
+application-label-hu:'TG Matrix Kit'
+application-label-hy:'TG Matrix Kit'
+application-label-in:'TG Matrix Kit'
+application-label-is:'TG Matrix Kit'
+application-label-it:'TG Matrix Kit'
+application-label-iw:'TG Matrix Kit'
+application-label-ja:'TG Matrix Kit'
+application-label-ka:'TG Matrix Kit'
+application-label-kk:'TG Matrix Kit'
+application-label-km:'TG Matrix Kit'
+application-label-kn:'TG Matrix Kit'
+application-label-ko:'TG Matrix Kit'
+application-label-ky:'TG Matrix Kit'
+application-label-lo:'TG Matrix Kit'
+application-label-lt:'TG Matrix Kit'
+application-label-lv:'TG Matrix Kit'
+application-label-mk:'TG Matrix Kit'
+application-label-ml:'TG Matrix Kit'
+application-label-mn:'TG Matrix Kit'
+application-label-mr:'TG Matrix Kit'
+application-label-ms:'TG Matrix Kit'
+application-label-my:'TG Matrix Kit'
+application-label-nb:'TG Matrix Kit'
+application-label-ne:'TG Matrix Kit'
+application-label-nl:'TG Matrix Kit'
+application-label-or:'TG Matrix Kit'
+application-label-pa:'TG Matrix Kit'
+application-label-pl:'TG Matrix Kit'
+application-label-pt:'TG Matrix Kit'
+application-label-pt-BR:'TG Matrix Kit'
+application-label-pt-PT:'TG Matrix Kit'
+application-label-ro:'TG Matrix Kit'
+application-label-ru:'TG Matrix Kit'
+application-label-si:'TG Matrix Kit'
+application-label-sk:'TG Matrix Kit'
+application-label-sl:'TG Matrix Kit'
+application-label-sq:'TG Matrix Kit'
+application-label-sr:'TG Matrix Kit'
+application-label-sr-Latn:'TG Matrix Kit'
+application-label-sv:'TG Matrix Kit'
+application-label-sw:'TG Matrix Kit'
+application-label-ta:'TG Matrix Kit'
+application-label-te:'TG Matrix Kit'
+application-label-th:'TG Matrix Kit'
+application-label-tl:'TG Matrix Kit'
+application-label-tr:'TG Matrix Kit'
+application-label-uk:'TG Matrix Kit'
+application-label-ur:'TG Matrix Kit'
+application-label-uz:'TG Matrix Kit'
+application-label-vi:'TG Matrix Kit'
+application-label-zh-CN:'TG Matrix Kit'
+application-label-zh-HK:'TG Matrix Kit'
+application-label-zh-TW:'TG Matrix Kit'
+application-label-zu:'TG Matrix Kit'
+application-icon-120:'res/mipmap-anydpi-v26/ic_launcher.xml'
+application-icon-160:'res/mipmap-anydpi-v26/ic_launcher.xml'
+application-icon-240:'res/mipmap-anydpi-v26/ic_launcher.xml'
+application-icon-320:'res/mipmap-anydpi-v26/ic_launcher.xml'
+application-icon-480:'res/mipmap-anydpi-v26/ic_launcher.xml'
+application-icon-640:'res/mipmap-anydpi-v26/ic_launcher.xml'
+application-icon-65534:'res/mipmap-anydpi-v26/ic_launcher.xml'
+application: label='TG Matrix Kit' icon='res/mipmap-anydpi-v26/ic_launcher.xml'
+application-debuggable
+launchable-activity: name='com.kipingame.tgkit.MainActivity'  label='TG Matrix Kit' icon=''
+feature-group: label=''
+  uses-feature: name='android.hardware.faketouch'
+  uses-implied-feature: name='android.hardware.faketouch' reason='default feature for all apps'
+main
+other-receivers
+supports-screens: 'small' 'normal' 'large' 'xlarge'
+supports-any-density: 'true'
+locales: '--_--' 'af' 'am' 'ar' 'as' 'az' 'be' 'bg' 'bn' 'bs' 'ca' 'cs' 'da' 'de' 'el' 'en-AU' 'en-CA' 'en-GB' 'en-IN' 'en-XC' 'es' 'es-US' 'et' 'eu' 'fa' 'fi' 'fr' 'fr-CA' 'gl' 'gu' 'hi' 'hr' 'hu' 'hy' 'in' 'is' 'it' 'iw' 'ja' 'ka' 'kk' 'km' 'kn' 'ko' 'ky' 'lo' 'lt' 'lv' 'mk' 'ml' 'mn' 'mr' 'ms' 'my' 'nb' 'ne' 'nl' 'or' 'pa' 'pl' 'pt' 'pt-BR' 'pt-PT' 'ro' 'ru' 'si' 'sk' 'sl' 'sq' 'sr' 'sr-Latn' 'sv' 'sw' 'ta' 'te' 'th' 'tl' 'tr' 'uk' 'ur' 'uz' 'vi' 'zh-CN' 'zh-HK' 'zh-TW' 'zu'
+densities: '120' '160' '240' '320' '480' '640' '65534'
+
+ANDROID MANIFEST
+N: android=http://schemas.android.com/apk/res/android
+  E: manifest (line=2)
+    A: android:versionCode(0x0101021b)=(type 0x10)0x1
+    A: android:versionName(0x0101021c)="1.0" (Raw: "1.0")
+    A: android:compileSdkVersion(0x01010572)=(type 0x10)0x22
+    A: android:compileSdkVersionCodename(0x01010573)="14" (Raw: "14")
+    A: package="com.kipingame.tgkit" (Raw: "com.kipingame.tgkit")
+    A: platformBuildVersionCode=(type 0x10)0x22
+    A: platformBuildVersionName=(type 0x10)0xe
+    E: uses-sdk (line=7)
+      A: android:minSdkVersion(0x0101020c)=(type 0x10)0x16
+      A: android:targetSdkVersion(0x01010270)=(type 0x10)0x22
+    E: uses-permission (line=13)
+      A: android:name(0x01010003)="android.permission.INTERNET" (Raw: "android.permission.INTERNET")
+    E: permission (line=15)
+      A: android:name(0x01010003)="com.kipingame.tgkit.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" (Raw: "com.kipingame.tgkit.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION")
+      A: android:protectionLevel(0x01010009)=(type 0x11)0x2
+    E: uses-permission (line=19)
+      A: android:name(0x01010003)="com.kipingame.tgkit.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" (Raw: "com.kipingame.tgkit.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION")
+    E: application (line=21)
+      A: android:theme(0x01010000)=@0x7f0e0005
+      A: android:label(0x01010001)=@0x7f0d001c
+      A: android:icon(0x01010002)=@0x7f0c0000
+      A: android:debuggable(0x0101000f)=(type 0x12)0xffffffff
+      A: android:allowBackup(0x01010280)=(type 0x12)0xffffffff
+      A: android:supportsRtl(0x010103af)=(type 0x12)0xffffffff
+      A: android:extractNativeLibs(0x010104ea)=(type 0x12)0xffffffff
+      A: android:roundIcon(0x0101052c)=@0x7f0c0002
+      A: android:appComponentFactory(0x0101057a)="androidx.core.app.CoreComponentFactory" (Raw: "androidx.core.app.CoreComponentFactory")
+      E: activity (line=31)
+        A: android:theme(0x01010000)=@0x7f0e0007
+        A: android:label(0x01010001)=@0x7f0d0029
+        A: android:name(0x01010003)="com.kipingame.tgkit.MainActivity" (Raw: "com.kipingame.tgkit.MainActivity")
+        A: android:exported(0x01010010)=(type 0x12)0xffffffff
+        A: android:launchMode(0x0101001d)=(type 0x10)0x2
+        A: android:configChanges(0x0101001f)=(type 0x11)0xfb4
+        E: intent-filter (line=38)
+          E: action (line=39)
+            A: android:name(0x01010003)="android.intent.action.MAIN" (Raw: "android.intent.action.MAIN")
+          E: category (line=41)
+            A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")
+      E: provider (line=45)
+        A: android:name(0x01010003)="androidx.core.content.FileProvider" (Raw: "androidx.core.content.FileProvider")
+        A: android:exported(0x01010010)=(type 0x12)0x0
+        A: android:authorities(0x01010018)="com.kipingame.tgkit.fileprovider" (Raw: "com.kipingame.tgkit.fileprovider")
+        A: android:grantUriPermissions(0x0101001b)=(type 0x12)0xffffffff
+        E: meta-data (line=50)
+          A: android:name(0x01010003)="android.support.FILE_PROVIDER_PATHS" (Raw: "android.support.FILE_PROVIDER_PATHS")
+          A: android:resource(0x01010025)=@0x7f100001
+      E: provider (line=54)
+        A: android:name(0x01010003)="androidx.startup.InitializationProvider" (Raw: "androidx.startup.InitializationProvider")
+        A: android:exported(0x01010010)=(type 0x12)0x0
+        A: android:authorities(0x01010018)="com.kipingame.tgkit.androidx-startup" (Raw: "com.kipingame.tgkit.androidx-startup")
+        E: meta-data (line=58)
+          A: android:name(0x01010003)="androidx.emoji2.text.EmojiCompatInitializer" (Raw: "androidx.emoji2.text.EmojiCompatInitializer")
+          A: android:value(0x01010024)="androidx.startup" (Raw: "androidx.startup")
+        E: meta-data (line=61)
+          A: android:name(0x01010003)="androidx.lifecycle.ProcessLifecycleInitializer" (Raw: "androidx.lifecycle.ProcessLifecycleInitializer")
+          A: android:value(0x01010024)="androidx.startup" (Raw: "androidx.startup")
+        E: meta-data (line=64)
+          A: android:name(0x01010003)="androidx.profileinstaller.ProfileInstallerInitializer" (Raw: "androidx.profileinstaller.ProfileInstallerInitializer")
+          A: android:value(0x01010024)="androidx.startup" (Raw: "androidx.startup")
+      E: receiver (line=69)
+        A: android:name(0x01010003)="androidx.profileinstaller.ProfileInstallReceiver" (Raw: "androidx.profileinstaller.ProfileInstallReceiver")
+        A: android:permission(0x01010006)="android.permission.DUMP" (Raw: "android.permission.DUMP")
+        A: android:enabled(0x0101000e)=(type 0x12)0xffffffff
+        A: android:exported(0x01010010)=(type 0x12)0xffffffff
+        A: android:directBootAware(0x01010505)=(type 0x12)0x0
+        E: intent-filter (line=75)
+          E: action (line=76)
+            A: android:name(0x01010003)="androidx.profileinstaller.action.INSTALL_PROFILE" (Raw: "androidx.profileinstaller.action.INSTALL_PROFILE")
+        E: intent-filter (line=78)
+          E: action (line=79)
+            A: android:name(0x01010003)="androidx.profileinstaller.action.SKIP_FILE" (Raw: "androidx.profileinstaller.action.SKIP_FILE")
+        E: intent-filter (line=81)
+          E: action (line=82)
+            A: android:name(0x01010003)="androidx.profileinstaller.action.SAVE_PROFILE" (Raw: "androidx.profileinstaller.action.SAVE_PROFILE")
+        E: intent-filter (line=84)
+          E: action (line=85)
+            A: android:name(0x01010003)="androidx.profileinstaller.action.BENCHMARK_OPERATION" (Raw: "androidx.profileinstaller.action.BENCHMARK_OPERATION")
