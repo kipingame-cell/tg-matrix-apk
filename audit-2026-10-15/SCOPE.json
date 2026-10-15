@@ -1,0 +1,115 @@
+{
+  "date": "2026-10-15",
+  "repo": "tg-matrix-apk",
+  "snapshot_ref": "55212aa004da629f9b065785f1ddd89c2ddcc83e",
+  "branch": "main",
+  "files_in_tree": 22,
+  "fetched_files": [
+    ".github/workflows/build.yml",
+    ".github/workflows/publish-artifact-releases.yml",
+    "README.md",
+    "apply-signing.js",
+    "build-apk.yml.txt",
+    "build.js",
+    "capacitor.config.json",
+    "package.json",
+    "scripts/publish-artifact-releases.py",
+    "src/app.js",
+    "src/empty.js",
+    "www/graph/index.html",
+    "www/heatmap/app.js",
+    "www/heatmap/index.html",
+    "www/index.html"
+  ],
+  "findings": 3,
+  "apk_runtime_tested": false,
+  "full_history_audited": false,
+  "releases_sample": [
+    {
+      "tag": "build-1-08a05136931e",
+      "draft": true,
+      "prerelease": true,
+      "assets": []
+    },
+    {
+      "tag": "",
+      "draft": true,
+      "prerelease": false,
+      "assets": [
+        "app-debug.apk"
+      ]
+    },
+    {
+      "tag": "build-9-3590911dfce2",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        "SHA256SUMS.txt",
+        "tg-matrix-kit-apk-app-debug.apk"
+      ]
+    },
+    {
+      "tag": "build-8-c6a0e7027a34",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        "SHA256SUMS.txt",
+        "tg-matrix-kit-apk-app-debug.apk"
+      ]
+    },
+    {
+      "tag": "build-40-2b1b0e3910d5",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        "SHA256SUMS.txt",
+        "tg-matrix-kit-apk-app-debug.apk"
+      ]
+    },
+    {
+      "tag": "build-4-5984898e4d1c",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        "SHA256SUMS.txt",
+        "tg-matrix-kit-apk-app-debug.apk"
+      ]
+    },
+    {
+      "tag": "build-39-fc921d6fa711",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        "SHA256SUMS.txt",
+        "tg-matrix-kit-apk-app-debug.apk"
+      ]
+    },
+    {
+      "tag": "build-38-71af19ef6319",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        "SHA256SUMS.txt",
+        "tg-matrix-kit-apk-app-debug.apk"
+      ]
+    },
+    {
+      "tag": "build-37-617b0f9cd08f",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        "SHA256SUMS.txt",
+        "tg-matrix-kit-apk-app-debug.apk"
+      ]
+    },
+    {
+      "tag": "build-36-e4bb267fb295",
+      "draft": false,
+      "prerelease": true,
+      "assets": [
+        "SHA256SUMS.txt",
+        "tg-matrix-kit-apk-app-debug.apk"
+      ]
+    }
+  ]
+}
