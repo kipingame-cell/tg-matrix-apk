@@ -32,7 +32,11 @@ async function init() {
         users.forEach((u, i) => {
             const l = document.createElement('label');
             l.style.display = 'block';
-            l.innerHTML = `<input type="checkbox" value="${u}"> <span style="color:${colors[i % colors.length]}">${u}</span>`;
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox'; checkbox.value = u;
+            const name = document.createElement('span');
+            name.style.color = colors[i % colors.length]; name.textContent = u;
+            l.append(checkbox, document.createTextNode(' '), name);
             l.querySelector('input').onchange = render;
             cont.appendChild(l);
         });
@@ -48,7 +52,10 @@ async function init() {
         }
         render();
     } catch (e) {
-        document.body.innerHTML += `<div style="color:red; padding:20px;">КРИТИЧЕСКИЙ СБОЙ: ${e.message}</div>`;
+        const error = document.createElement('div');
+        error.style.cssText = 'color:red;padding:20px';
+        error.textContent = 'КРИТИЧЕСКИЙ СБОЙ: ' + e.message;
+        document.body.append(error);
     }
 }
 
@@ -212,3 +219,4 @@ document.getElementById('btn_all').onclick = () => { document.querySelectorAll('
 document.getElementById('btn_none').onclick = () => { document.querySelectorAll('#users_container input').forEach(i => i.checked = false); render(); };
 
 init();
+

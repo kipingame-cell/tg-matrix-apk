@@ -1,27 +1,19 @@
-// Постоянная подпись debug-APK: один и тот же ключ на всех сборках -> APK ставится как обновление.
-// Запускается в Actions ПОСЛЕ `npx cap add android`, ДО gradlew.
-const fs = require('fs');
-const path = require('path');
-
-const b64 = fs.readFileSync(path.join(__dirname, 'tgk.keystore.b64'), 'utf8').replace(/\s+/g, '');
-fs.writeFileSync(path.join(__dirname, 'android', 'tgk.keystore'), Buffer.from(b64, 'base64'));
-
-const gradlePath = path.join(__dirname, 'android', 'app', 'build.gradle');
-let g = fs.readFileSync(gradlePath, 'utf8');
-
-if (!g.includes('tgk.keystore')) {
-    g = g.replace(/android \{/,
-`android {
+// Signing material must come from private CI secrets, never the repository.
+const fs = require('node:fs');
+const required = ['ANDROID_KEYSTORE_BASE64','ANDROID_KEYSTORE_PASSWORD','ANDROID_KEY_ALIAS','ANDROID_KEY_PASSWORD'];
+for (const name of required) if (!process.env[name]) throw new Error('Missing signing secret: ' + name);
+const gradlePath = 'android/app/build.gradle';
+const g = fs.readFileSync(gradlePath, 'utf8');
+if (!/android\s*\{/.test(g)) throw new Error('Android Gradle block not found');
+if (g.includes('auditPrivateSigning')) throw new Error('Signing already configured');
+fs.writeFileSync('android/private-signing.keystore', Buffer.from(process.env.ANDROID_KEYSTORE_BASE64, 'base64'), {mode:0o600});
+fs.writeFileSync(gradlePath, g.replace(/android\s*\{/, `android {
+    // auditPrivateSigning
     signingConfigs {
         debug {
-            storeFile file('../tgk.keystore')
-            storePassword 'tgmatrix2026'
-            keyAlias 'tgk'
-            keyPassword 'tgmatrix2026'
+            storeFile file('../private-signing.keystore')
+            storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+            keyAlias System.getenv('ANDROID_KEY_ALIAS')
+            keyPassword System.getenv('ANDROID_KEY_PASSWORD')
         }
-    }`);
-    fs.writeFileSync(gradlePath, g);
-    console.log('signingConfig: tgk.keystore подключён');
-} else {
-    console.log('signingConfig уже на месте');
-}
+    }`));
